@@ -111,9 +111,7 @@ namespace mdf {
 //第i个socket有接收可连接
     bool STEpoll::IsAcceptAble(int i) {
 #ifndef WIN32
-        if (m_listenSockets.end() == m_listenSockets.find(m_events[i].data.fd))
-            return false;
-        return true;
+        return !(m_listenSockets.end() == m_listenSockets.find(m_events[i].data.fd));
 #endif
         return false;
     }

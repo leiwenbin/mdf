@@ -283,7 +283,7 @@ namespace mdf {
         int nFlag = 0;
         if (bCheckDataLength)
             nFlag = MSG_PEEK;
-        nResult = recv(m_hSocket, (char*) lpBuf, nBufLen, nFlag);
+        nResult = (int) recv(m_hSocket, (char*) lpBuf, nBufLen, nFlag);
         if (0 == nResult)
             return seSocketClose; //断开连接
         if (SOCKET_ERROR != nResult)
@@ -310,7 +310,7 @@ namespace mdf {
  返回值：成功实际发送的字节数，失败返回小于0
  */
     int Socket::Send(const void* lpBuf, int nBufLen, int nFlags) {
-        int nSendSize = send(m_hSocket, (char*) lpBuf, nBufLen, nFlags);
+        int nSendSize = (int) send(m_hSocket, (char*) lpBuf, nBufLen, nFlags);
         if (0 > nSendSize) {
 #ifdef WIN32
             int nError = GetLastError();
@@ -346,7 +346,7 @@ namespace mdf {
             unsigned long lResult = inet_addr(strIP);
             if (lResult == INADDR_NONE)
                 return false;
-            pAddr->sin_addr.s_addr = lResult;
+            pAddr->sin_addr.s_addr = (in_addr_t) lResult;
         }
         pAddr->sin_port = htons((unsigned short) nPort);
 
@@ -431,12 +431,8 @@ namespace mdf {
         if (SOCKET_ERROR == nSelectRet) {
             return true;
         }
-        if (0 == nSelectRet) //超时发生，无可读数据
-        {
-            return true;
-        }
+        return 0 == nSelectRet;
 
-        return false;
     }
 
 //功能：等待数据

@@ -1,17 +1,13 @@
 #ifdef WIN32
 #include <windows.h>
 #else
-
 #include <unistd.h>
-
-#define strnicmp strncasecmp
 #endif
 
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
-#include <time.h>
 
 #include "../../../include/mdf/mapi.h"
 #include "../../../include/mdf/Socket.h"
@@ -21,7 +17,6 @@
 #include "../../../include/frame/netserver/NetEventMonitor.h"
 #include "../../../include/frame/netserver/NetServer.h"
 #include "../../../include/mdf/atom.h"
-#include "../../../include/mdf/MemoryPool.h"
 
 using namespace std;
 namespace mdf {
@@ -185,7 +180,7 @@ namespace mdf {
                 continue;
             }
             //无心跳/连接已断开，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
-            CloseConnect((NetConnect*) it->second);
+            CloseConnect(it->second);
             it = m_connectList.begin();
         }
         lock.Unlock();
@@ -303,7 +298,7 @@ namespace mdf {
 
     bool NetEngine::OnConnect(int sock, SVR_CONNECT* pSvr) {
         if (m_noDelay) Socket::SetNoDelay(sock, true);
-        NetConnect* pConnect = new(m_pConnectPool->Alloc()) NetConnect(sock, NULL == pSvr ? false : true, m_pNetMonitor, this, m_pConnectPool);
+        NetConnect* pConnect = new(m_pConnectPool->Alloc()) NetConnect(sock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
         if (NULL == pConnect) {
             closesocket(sock);
             return false;
@@ -343,7 +338,7 @@ namespace mdf {
             AutoLock lock(&m_connectsMutex);
             ConnectList::iterator itNetConnect = m_connectList.find(connectId);
             if (itNetConnect == m_connectList.end()) return 0; //底层已经主动断开
-            CloseConnect((NetConnect*) itNetConnect->second);
+            CloseConnect(itNetConnect->second);
             pConnect->Release();
             return 0;
         }
@@ -381,7 +376,7 @@ namespace mdf {
                 AutoLock lock(&m_connectsMutex);
                 ConnectList::iterator itNetConnect = m_connectList.find(connectId);
                 if (itNetConnect == m_connectList.end()) return 0; //底层已经主动断开
-                CloseConnect((NetConnect*) itNetConnect->second);
+                CloseConnect(itNetConnect->second);
             }
         }
         pConnect->Release();
@@ -392,7 +387,7 @@ namespace mdf {
         AutoLock lock(&m_connectsMutex);
         ConnectList::iterator itNetConnect = m_connectList.find(connectId);
         if (itNetConnect == m_connectList.end()) return; //底层已经主动断开
-        CloseConnect((NetConnect*) itNetConnect->second);
+        CloseConnect(itNetConnect->second);
         lock.Unlock();
     }
 
@@ -488,7 +483,7 @@ namespace mdf {
         AutoLock lock(&m_connectsMutex);
         ConnectList::iterator itNetConnect = m_connectList.find(connectId);
         if (itNetConnect == m_connectList.end()) return; //底层已经主动断开
-        CloseConnect((NetConnect*) itNetConnect->second);
+        CloseConnect(itNetConnect->second);
     }
 
 //响应发送完成事件
@@ -521,8 +516,7 @@ namespace mdf {
         if (m_stop) return true;
 
         it->second = ListenPort(port);
-        if (INVALID_SOCKET == it->second) return false;
-        return true;
+        return INVALID_SOCKET != it->second;
     }
 
     int NetEngine::ListenPort(int port) {

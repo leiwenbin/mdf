@@ -5,7 +5,6 @@
 #include "../../../include/frame/netserver/IOCPMonitor.h"
 #include "../../../include/frame/netserver/IOCPFrame.h"
 #include "../../../include/frame/netserver/NetConnect.h"
-#include "../../../include/mdf/atom.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -109,7 +108,7 @@ namespace mdf {
             m_pNetMonitor->AddSend(pConnect->GetSocket()->GetSocket(), (char*) &iocpData, sizeof(IOCP_DATA));
         } else {
             pConnect->m_sendBuffer.ReadData(buf, nLength, false);
-            iocpData.bufSize = nLength;
+            iocpData.bufSize = (unsigned short) nLength;
             m_pNetMonitor->AddSend(pConnect->GetSocket()->GetSocket(), (char*) &iocpData, sizeof(IOCP_DATA));
         }
         return ok;

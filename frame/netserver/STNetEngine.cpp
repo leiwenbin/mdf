@@ -3,22 +3,13 @@
 
 #ifdef WIN32
 #include <windows.h>
-#else
-
-#include <unistd.h>
-
-#define strnicmp strncasecmp
 #endif
 
-#include <string>
 #include <vector>
 #include <list>
 #include <iostream>
-#include <time.h>
 
-#include "../../../include/mdf/Socket.h"
 #include "../../../include/mdf/atom.h"
-#include "../../../include/mdf/MemoryPool.h"
 #include "../../../include/mdf/mapi.h"
 
 #include "../../../include/frame/netserver/STNetEngine.h"
@@ -328,8 +319,7 @@ namespace mdf {
 
     bool STNetEngine::OnConnect(int sock, SVR_CONNECT* pSvr) {
         if (m_noDelay) Socket::SetNoDelay(sock, true);
-        STNetConnect* pConnect = new(m_pConnectPool->Alloc()) STNetConnect(sock,
-                                                                           NULL == pSvr ? false : true, m_pNetMonitor, this, m_pConnectPool);
+        STNetConnect* pConnect = new(m_pConnectPool->Alloc()) STNetConnect(sock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
         if (NULL == pConnect) {
             closesocket(sock);
             return false;
@@ -548,8 +538,7 @@ namespace mdf {
         if (m_stop) return true;
 
         it->second = ListenPort(port);
-        if (INVALID_SOCKET == it->second) return false;
-        return true;
+        return INVALID_SOCKET != it->second;
     }
 
     int STNetEngine::ListenPort(int port) {

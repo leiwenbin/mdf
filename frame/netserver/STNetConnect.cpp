@@ -5,9 +5,7 @@
 #include "../../../include/frame/netserver/STNetConnect.h"
 #include "../../../include/frame/netserver/STNetEngine.h"
 #include "../../../include/frame/netserver/STEpoll.h"
-#include "../../../include/frame/netserver/NetEventMonitor.h"
 #include "../../../include/mdf/atom.h"
-#include "../../../include/mdf/MemoryPool.h"
 
 using namespace std;
 unsigned int g_r = 0;
@@ -138,8 +136,7 @@ namespace mdf {
 
 //开始发送流程
     bool STNetConnect::SendStart() {
-        if (0 != AtomAdd(&m_nSendCount, 1)) return false; //只允许存在一个发送流程
-        return true;
+        return 0 == AtomAdd(&m_nSendCount, 1); //只允许存在一个发送流程
     }
 
 //结束发送流程

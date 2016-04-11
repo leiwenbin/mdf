@@ -6,15 +6,11 @@
 #include "../../../include/frame/netserver/EpollFrame.h"
 #include "../../../include/frame/netserver/NetConnect.h"
 #include "../../../include/mdf/mapi.h"
-#include "../../../include/mdf/atom.h"
-#include "../../../include/mdf/Lock.h"
-#include "../../../include/mdf/Socket.h"
 
 using namespace std;
 
 #ifndef WIN32
 
-#include <sys/epoll.h>
 #include <cstdlib>
 #include <cstdio>
 
