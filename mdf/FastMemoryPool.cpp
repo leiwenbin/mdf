@@ -36,13 +36,12 @@ namespace mdf {
         while (NULL != m_poolHeader) {
             pPool = m_poolHeader;
             m_poolHeader = m_poolHeader->next;
-            delete[] pPool->buffer;
-            delete pPool;
+            MDF_SAFE_DELETE_ARRAY(pPool->buffer);
+            MDF_SAFE_DELETE(pPool);
         }
 
-        int i = 0;
-        for (i = 0; i < m_threadCount; i++) {
-            delete m_poolForThread[i];
+        for (int i = 0; i < m_threadCount; i++) {
+            MDF_SAFE_DELETE(m_poolForThread[i]);
         }
     }
 
@@ -56,7 +55,6 @@ namespace mdf {
         pPool->next = m_poolHeader;
         m_poolHeader = pPool;
 
-        int i = 0;
         int pos = 0;
         MEMORY* pMemory = (MEMORY*) buffer;
         pMemory->pPool = pPool;
@@ -66,8 +64,8 @@ namespace mdf {
         pMemory->next = NULL;
         pos += sizeof(MEMORY) + m_objectSize;
 
-        for (i = 1; i < m_expandCount; i++) {
-            pMemory->next = (MEMORY * ) & buffer[pos];
+        for (int i = 1; i < m_expandCount; i++) {
+            pMemory->next = (MEMORY*) &buffer[pos];
             pMemory = pMemory->next;
             pMemory->pPool = pPool;
             pMemory->isAlloced = 0;
@@ -89,10 +87,9 @@ namespace mdf {
         int pos = 0;
         for (; NULL != pPool; pPool = pPool->next) {
             if (pPool->freeCount == 0) continue;
-            i = 0;
             pos = 0;
             for (i = 0; i < m_expandCount; i++) {
-                pMemory = (MEMORY * ) & pPool->buffer[pos];
+                pMemory = (MEMORY*) &pPool->buffer[pos];
                 if (0 == pMemory->isAlloced) {
                     pMemory->next = m_header;
                     m_header = pMemory;
@@ -103,9 +100,7 @@ namespace mdf {
 
         //////////////////////////////////////////////////////////////////////////
         //
-        if (NULL == m_header) {
-            Expand();
-        }
+        if (NULL == m_header) Expand();
         mdf_assert(NULL != m_header);
     }
 
@@ -132,9 +127,7 @@ namespace mdf {
     }
 
     void* FastMemoryPool::AllocMethod() {
-        if (NULL == m_header) {
-            UniteFree();
-        }
+        if (NULL == m_header) UniteFree();
         MEMORY* pMemory = m_header;
         m_header = m_header->next;
 
@@ -150,11 +143,8 @@ namespace mdf {
 
     void FastMemoryPool::Free(void* pObject) {
         if (NULL == pObject) return;
-        MEMORY* pMemory = (MEMORY * )((char*) pObject - sizeof(MEMORY));
-        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize)) //捕获用户对不属于内存池的内存调用Free
-        {
-            mdf_assert(false);
-        }
+        MEMORY* pMemory = (MEMORY*) ((char*) pObject - sizeof(MEMORY));
+        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize)) mdf_assert(false);//捕获用户对不属于内存池的内存调用Free
         mdf_assert(NULL == pMemory->next);
         if (1 != AtomAdd(&pMemory->isAlloced, -1)) mdf_assert(false); //捕获用户未配对的Alloc()/Free()调用
         AtomAdd(&pMemory->pPool->freeCount, 1);
