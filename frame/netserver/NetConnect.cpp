@@ -264,9 +264,7 @@ namespace mdf {
         if (!m_pHostData->m_autoFree) {
             //自主模式，需要记录引用计数
             if (-1 == (int) AtomAdd(&m_pHostData->m_refCount, 1)) //取数据时，有线程执行了SetData(NULL)解除关联，绝对不会是Release()释放数据
-            {
                 return NULL;
-            }
         }
         return m_pHostData;
     }

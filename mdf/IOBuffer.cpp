@@ -4,8 +4,7 @@
 
 #include "../../include/mdf/IOBuffer.h"
 #include "../../include/mdf/atom.h"
-#include <string.h>
-#include <mdf/mapi.h>
+#include "../../include/mdf/mapi.h"
 
 using namespace std;
 

@@ -14,8 +14,8 @@ namespace mdf {
     NetHost::NetHost(const NetHost& obj) :
             m_pConnect(NULL) {
         *this = obj;
-//	AtomAdd(&obj.m_pConnect->m_useCount, 1);
-//	m_pConnect = obj.m_pConnect;
+    //	AtomAdd(&obj.m_pConnect->m_useCount, 1);
+    //	m_pConnect = obj.m_pConnect;
     }
 
     NetHost& NetHost::operator=(const NetHost& obj) {
@@ -51,12 +51,12 @@ namespace mdf {
         return m_pConnect->GetID();
     }
 
-//放入某分组
+    //放入某分组
     void NetHost::InGroup(int groupID) {
         m_pConnect->InGroup(groupID);
     }
 
-//从某分组删除
+    //从某分组删除
     void NetHost::OutGroup(int groupID) {
         m_pConnect->OutGroup(groupID);
     }
@@ -83,4 +83,15 @@ namespace mdf {
     void* NetHost::GetSvrInfo() {
         return m_pConnect->GetSvrInfo();
     }
+
+    //获取最近心跳时间
+    time_t NetHost::GetLastHeartTime() {
+        return m_pConnect->GetLastHeart();
+    }
+
+    //获取连接创建时间
+    time_t NetHost::GetConnectCreateTime() {
+        return m_pConnect->GetCreateTime();
+    }
+
 } // namespace mdf

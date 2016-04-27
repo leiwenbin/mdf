@@ -170,31 +170,30 @@ namespace mdf {
         NetConnect* pConnect;
         time_t tCurTime = 0;
         tCurTime = time(NULL);
-        time_t tLastHeart;
-        time_t tCreateTime;
+        time_t tLastHeart = 0;
+        time_t tCreateTime = 0;
         AutoLock lock(&m_connectsMutex);
+        bool bClose;
         for (it = m_connectList.begin(); it != m_connectList.end();) {
+            bClose = false;
             pConnect = it->second;
-            if (pConnect->IsServer()) //服务连接，不检查心跳
-            {
-                it++;
-                continue;
+            if (!pConnect->IsServer()) {
+                //非SERVER连接,检查心跳
+                tLastHeart = pConnect->GetLastHeart();
+                if (tCurTime >= tLastHeart && tCurTime - tLastHeart >= m_nHeartTime) //无心跳
+                    bClose = true;
+
+                //检查空连接
+                tCreateTime = pConnect->GetCreateTime();
+                if (m_nFreeTime > 0 && tCurTime >= tCreateTime && tLastHeart == tCreateTime && tCurTime - tCreateTime >= m_nFreeTime) //空连接
+                    bClose = true;
             }
-            //检查心跳
-            tLastHeart = pConnect->GetLastHeart();
-            if (tCurTime < tLastHeart || tCurTime - tLastHeart < m_nHeartTime) //有心跳
-            {
-                it++;
-                continue;
-            }
-            //检查空连接
-            tCreateTime = pConnect->GetCreateTime();
-            if (0 >= m_nFreeTime || tCurTime < tCreateTime || tLastHeart != tCreateTime || tCurTime - tCreateTime < m_nFreeTime) //有数据交互
-            {
-                it++;
-                continue;
-            }
+
             //无心跳/连接已断开/空连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
+            if (!bClose) {
+                it++;
+                continue;
+            }
             CloseConnect(it->second);
             it = m_connectList.begin();
         }
