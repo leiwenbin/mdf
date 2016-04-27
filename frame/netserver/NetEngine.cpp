@@ -1,7 +1,9 @@
 #ifdef WIN32
 #include <windows.h>
 #else
+
 #include <unistd.h>
+
 #endif
 
 #include <string>
@@ -48,22 +50,27 @@ namespace mdf {
         Socket::SocketDestory();
     }
 
-//设置平均连接数
+    //设置平均连接数
     void NetEngine::SetAverageConnectCount(int count) {
         m_averageConnectCount = count;
     }
 
-//设置心跳时间
+    //设置心跳时间
     void NetEngine::SetHeartTime(int nSecond) {
         m_nHeartTime = nSecond;
     }
 
-//设置网络IO线程数量
+    //设置防空连接时间,只有设置了心跳时间才有效
+    void NetEngine::SetFreeTime(int nSecond) {
+        m_nFreeTime = nSecond;
+    }
+
+    //设置网络IO线程数量
     void NetEngine::SetIOThreadCount(int nCount) {
         m_ioThreadCount = nCount; //网络io线程数量
     }
 
-//设置工作线程数
+    //设置工作线程数
     void NetEngine::SetWorkThreadCount(int nCount) {
         m_workThreadCount = nCount; //工作线程数量
     }
@@ -76,10 +83,10 @@ namespace mdf {
         m_workThreads.SetOnStart(fun, pParam);
     }
 
-/**
- * 开始引擎
- * 成功返回true，失败返回false
- */
+    /**
+     * 开始引擎
+     * 成功返回true，失败返回false
+     */
     bool NetEngine::Start() {
         if (!m_stop) return true;
         m_stop = false;
@@ -128,12 +135,12 @@ namespace mdf {
         return NetMonitor(pParam);
     }
 
-//等待停止
+    //等待停止
     void NetEngine::WaitStop() {
         m_mainThread.WaitStop();
     }
 
-//停止引擎
+    //停止引擎
     void NetEngine::Stop() {
         if (m_stop) return;
         m_stop = true;
@@ -144,7 +151,7 @@ namespace mdf {
         m_workThreads.Stop();
     }
 
-//主线程
+    //主线程
     void* NetEngine::Main(void*) {
         while (!m_stop) {
             if (m_sigStop.Wait(10000)) break;
@@ -154,7 +161,7 @@ namespace mdf {
         return NULL;
     }
 
-//心跳线程
+    //心跳线程
     void NetEngine::HeartMonitor() {
         if (0 >= m_nHeartTime) return; //无心跳机制
         //////////////////////////////////////////////////////////////////////////
@@ -164,6 +171,7 @@ namespace mdf {
         time_t tCurTime = 0;
         tCurTime = time(NULL);
         time_t tLastHeart;
+        time_t tCreateTime;
         AutoLock lock(&m_connectsMutex);
         for (it = m_connectList.begin(); it != m_connectList.end();) {
             pConnect = it->second;
@@ -179,14 +187,20 @@ namespace mdf {
                 it++;
                 continue;
             }
-            //无心跳/连接已断开，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
+            //检查空连接
+            tCreateTime = pConnect->GetCreateTime();
+            if (0 >= m_nFreeTime || tCurTime < tCreateTime || tLastHeart != tCreateTime || tCurTime - tCreateTime < m_nFreeTime) //有数据交互
+            {
+                it++;
+                continue;
+            }
+            //无心跳/连接已断开/空连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
             CloseConnect(it->second);
             it = m_connectList.begin();
         }
-        lock.Unlock();
     }
 
-//关闭一个连接
+    //关闭一个连接
     void NetEngine::CloseConnect(NetConnect* pNetConnect) {
         /*
          必须先删除再关闭，顺序不能换，
@@ -235,7 +249,7 @@ namespace mdf {
          答：不会，因为m_bConnect标志被设置为false了，而OnMsg是在MsgWorker()中被循环调用，
          每次循环都会检查m_bConnect标志，所以即使还有数据可接收，OnMsg也会被终止
          */
-//	pConnect->GetSocket()->Close();
+        //pConnect->GetSocket()->Close();
         pConnect->m_bConnect = false;
         //将连接从列表中删除，因为父级方法加锁，所以这里不需要加锁
         ConnectList::iterator itNetConnect = m_connectList.find(pConnect->GetID());
@@ -303,9 +317,8 @@ namespace mdf {
             closesocket(sock);
             return false;
         }
-        if (NULL != pSvr && pSvr->pSvrInfo) {
+        if (NULL != pSvr && pSvr->pSvrInfo)
             pConnect->SetSvrInfo(pSvr->pSvrInfo);
-        }
         pConnect->GetSocket()->SetSockMode();
         //加入管理列表
         AutoLock lock(&m_connectsMutex);
@@ -388,7 +401,6 @@ namespace mdf {
         ConnectList::iterator itNetConnect = m_connectList.find(connectId);
         if (itNetConnect == m_connectList.end()) return; //底层已经主动断开
         CloseConnect(itNetConnect->second);
-        lock.Unlock();
     }
 
     void* NetEngine::CloseWorker(NetConnect* pConnect) {
@@ -478,7 +490,7 @@ namespace mdf {
         return unconnect;
     }
 
-//关闭一个连接
+    //关闭一个连接
     void NetEngine::CloseConnect(int64 connectId) {
         AutoLock lock(&m_connectsMutex);
         ConnectList::iterator itNetConnect = m_connectList.find(connectId);
@@ -486,7 +498,7 @@ namespace mdf {
         CloseConnect(itNetConnect->second);
     }
 
-//响应发送完成事件
+    //响应发送完成事件
     connectState NetEngine::OnSend(int64 connectId, unsigned short uSize) {
         connectState cs = unconnect;
         AutoLock lock(&m_connectsMutex);
@@ -657,7 +669,7 @@ namespace mdf {
         }
     }
 
-//向某组连接广播消息(业务层接口)
+    //向某组连接广播消息(业务层接口)
     void NetEngine::BroadcastMsg(int* recvGroupIDs, int recvCount, char* msg, unsigned int msgsize, int* filterGroupIDs, int filterCount) {
         //////////////////////////////////////////////////////////////////////////
         //关闭无心跳的连接
@@ -683,7 +695,7 @@ namespace mdf {
         }
     }
 
-//向某主机发送消息(业务层接口)
+    //向某主机发送消息(业务层接口)
     bool NetEngine::SendMsg(int64 hostID, char* msg, unsigned int msgsize) {
         AutoLock lock(&m_connectsMutex);
         ConnectList::iterator itNetConnect = m_connectList.find(hostID);
@@ -1033,7 +1045,7 @@ namespace mdf {
         return true;
     }
 
-//打开TCP_NODELAY
+    //打开TCP_NODELAY
     void NetEngine::OpenNoDelay() {
         m_noDelay = true;
     }

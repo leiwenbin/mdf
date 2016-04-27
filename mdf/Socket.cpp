@@ -322,9 +322,8 @@ namespace mdf {
             return seError;
 #endif
         }
-        if (nSendSize <= nBufLen) {
+        if (nSendSize <= nBufLen)
             return nSendSize;
-        }
         return seError;
     }
 

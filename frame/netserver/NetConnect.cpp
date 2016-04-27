@@ -13,8 +13,7 @@ using namespace std;
 
 namespace mdf {
 
-    NetConnect::NetConnect(int sock, bool bIsServer, NetEventMonitor* pNetMonitor, NetEngine* pEngine, MemoryPool* pMemoryPool) :
-            m_socket(sock, Socket::tcp) {
+    NetConnect::NetConnect(int sock, bool bIsServer, NetEventMonitor* pNetMonitor, NetEngine* pEngine, MemoryPool* pMemoryPool) : m_socket(sock, Socket::tcp) {
         m_pMemoryPool = pMemoryPool;
         m_useCount = 1;
         m_pEngine = pEngine;
@@ -29,7 +28,7 @@ namespace mdf {
         m_bConnect = true; //只有发现连接才创建对象，所以对象创建，就一定是连接状态
         m_nDoCloseWorkCount = 0; //没有执行过NetServer::OnClose()
         m_bIsServer = bIsServer;
-        m_tLastHeart = time(0);
+        m_tCreateTime = m_tLastHeart = time(0);
 #ifdef WIN32
         Socket::InitForIOCP(sock);
 #endif
@@ -79,6 +78,10 @@ namespace mdf {
         return m_tLastHeart;
     }
 
+    time_t NetConnect::GetCreateTime() {
+        return m_tCreateTime;
+    }
+
     unsigned char* NetConnect::PrepareBuffer(unsigned short uRecvSize) {
         return m_recvBuffer.PrepareBuffer(uRecvSize);
     }
@@ -106,9 +109,7 @@ namespace mdf {
         int nSendSize = 0;
         AutoLock lock(&m_sendMutex); //回复与主动通知存在并发send
         if (0 >= m_sendBuffer.GetLength()) //没有等待发送的数据，可直接发送
-        {
             nSendSize = m_socket.Send(pMsg, uLength);
-        }
         if (Socket::seError == nSendSize) return false; //发生错误，连接可能已断开
         if (uLength == (unsigned int) nSendSize) return true; //所有数据已发送，返回成功
 
@@ -148,12 +149,12 @@ namespace mdf {
         return m_id;
     }
 
-//开始发送流程
+    //开始发送流程
     bool NetConnect::SendStart() {
         return 0 == AtomAdd(&m_nSendCount, 1); //只允许存在一个发送流程
     }
 
-//结束发送流程
+    //结束发送流程
     void NetConnect::SendEnd() {
         m_nSendCount = 0;
     }

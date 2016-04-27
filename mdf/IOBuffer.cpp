@@ -28,7 +28,6 @@ namespace mdf {
         if (NULL == m_pRecvBufferBlock) return;
         AutoLock lock(&m_mutex);
         m_recvBufferList.push_back(m_pRecvBufferBlock); //加入缓冲列表
-        lock.Unlock();
     }
 
 /**
@@ -127,8 +126,6 @@ namespace mdf {
                 it++;
         }
 
-        lock.Unlock();
-
         return true;
     }
 
@@ -143,7 +140,6 @@ namespace mdf {
         m_recvBufferList.clear();
         m_pRecvBufferBlock = NULL;
         m_uDataSize = 0;
-        lock.Unlock();
     }
 
     uint32 IOBuffer::GetLength() {
