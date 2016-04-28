@@ -28,7 +28,8 @@ namespace mdf {
         m_pConnectPool = NULL;
         m_stop = true; //停止标志
         m_startError = "";
-        m_nHeartTime = 0; //心跳间隔(S)，默认不检查
+        m_nHeartTime = 0; //心跳间隔(S),默认不检查
+        m_nFreeTime = 0; //空闲连接时间(S),默认不检查
         m_pNetMonitor = NULL;
         m_ioThreadCount = 16; //网络io线程数量
         m_workThreadCount = 16; //工作线程数量
@@ -171,7 +172,6 @@ namespace mdf {
         time_t tCurTime = 0;
         tCurTime = time(NULL);
         time_t tLastHeart = 0;
-        time_t tCreateTime = 0;
         AutoLock lock(&m_connectsMutex);
         bool bClose;
         for (it = m_connectList.begin(); it != m_connectList.end();) {
@@ -184,8 +184,7 @@ namespace mdf {
                     bClose = true;
 
                 //检查空连接
-                tCreateTime = pConnect->GetCreateTime();
-                if (m_nFreeTime > 0 && tCurTime >= tCreateTime && tLastHeart == tCreateTime && tCurTime - tCreateTime >= m_nFreeTime) //空连接
+                if (m_nFreeTime > 0 && tCurTime >= tLastHeart && pConnect->IsUnused() && tCurTime - tLastHeart >= m_nFreeTime) //空连接
                     bClose = true;
             }
 
@@ -328,7 +327,7 @@ namespace mdf {
             m_nextConnectId++;
         }
         pConnect->SetID(connectId);
-        pConnect->RefreshHeart();
+        //pConnect->RefreshHeart();
         pair<ConnectList::iterator, bool> ret = m_connectList.insert(ConnectList::value_type(connectId, pConnect));
         AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
         lock.Unlock();
@@ -426,6 +425,7 @@ namespace mdf {
 
         NetConnect* pConnect = itNetConnect->second;
         pConnect->RefreshHeart();
+        pConnect->SetUsed();
         AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
         lock.Unlock(); //确保业务层占有对象后，HeartMonitor()才有机会检查pConnect的状态
         try {
@@ -539,18 +539,18 @@ namespace mdf {
         AutoLock lock(&m_listenMutex);
         map<int, int>::iterator it = m_serverPorts.begin();
         char strPort[256];
-        string strFaild;
+        string strFailed;
         for (; it != m_serverPorts.end(); it++) {
             if (INVALID_SOCKET != it->second) continue;
             it->second = ListenPort(it->first);
             if (INVALID_SOCKET == it->second) {
                 sprintf(strPort, "%d", it->first);
-                strFaild += strPort;
-                strFaild += " ";
+                strFailed += strPort;
+                strFailed += " ";
                 ret = false;
             }
         }
-        if (!ret) m_startError += "listen port:" + strFaild + "faild";
+        if (!ret) m_startError += "listen port:" + strFailed + "strFailed";
         return ret;
     }
 
@@ -1051,6 +1051,10 @@ namespace mdf {
 
     uint32 NetEngine::GetConnectionCount() {
         return m_connectList.size();
+    }
+
+    bool NetEngine::AllowAcceptConnection() {
+        return (int) m_connectList.size() < m_averageConnectCount;
     }
 
 }

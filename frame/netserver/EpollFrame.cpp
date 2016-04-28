@@ -71,8 +71,11 @@ namespace mdf {
 
                 listenSock.Detach();
                 listenSock.Attach((int) events[i].data.u64);
-                while (true) {
+
+                while (1) {
                     listenSock.Accept(clientSock);
+                    if (!AllowAcceptConnection())
+                        clientSock.Close();
                     if (INVALID_SOCKET == clientSock.GetSocket()) {
                         clientSock.Detach();
                         break;

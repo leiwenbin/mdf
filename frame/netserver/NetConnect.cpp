@@ -28,7 +28,8 @@ namespace mdf {
         m_bConnect = true; //只有发现连接才创建对象，所以对象创建，就一定是连接状态
         m_nDoCloseWorkCount = 0; //没有执行过NetServer::OnClose()
         m_bIsServer = bIsServer;
-        m_tCreateTime = m_tLastHeart = time(0);
+        m_tCreateTime = m_tLastHeart = time(NULL);
+        m_bUnused = true;
 #ifdef WIN32
         Socket::InitForIOCP(sock);
 #endif
@@ -80,6 +81,15 @@ namespace mdf {
 
     time_t NetConnect::GetCreateTime() {
         return m_tCreateTime;
+    }
+
+    bool NetConnect::IsUnused() {
+        return m_bUnused;
+    }
+
+    void NetConnect::SetUsed() {
+        if (m_bUnused)
+            m_bUnused = false;
     }
 
     unsigned char* NetConnect::PrepareBuffer(unsigned short uRecvSize) {
