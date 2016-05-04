@@ -469,26 +469,15 @@ namespace mdf {
     void* NetEngine::MsgWorker(NetConnect* pConnect) {
         for (; !m_stop;) {
             if (!pConnect->m_bConnect) {
-                printf("no connect\n");
                 pConnect->m_nReadCount = 0;
                 break;
             }
             pConnect->m_nReadCount = 1;
             //unsigned char* pMsg = MemoryPool
             //pConnect->m_host.Recv()
-            printf("xxxx\n");
             m_pNetServer->OnMsg(pConnect->m_host); //无返回值，避免框架逻辑依赖于客户实现
-            printf("yyyy\n");
-            printf("pConnect:%p\n", pConnect);
-            if (pConnect->IsReadAble()) {
-                printf("%p IsReadAble, read_count:%d\n", pConnect, pConnect->m_nReadCount);
-                continue;
-            }
-            printf("%p IsNotReadAble, read_count:%d\n", pConnect, pConnect->m_nReadCount);
-            if (1 == AtomDec(&pConnect->m_nReadCount, 1)) {
-                printf("read 0\n");
-                break; //避免漏接收
-            }
+            if (pConnect->IsReadAble()) continue;
+            if (1 == AtomDec(&pConnect->m_nReadCount, 1)) break; //避免漏接收
         }
         //触发OnClose(),确保NetServer::OnClose()一定在所有NetServer::OnMsg()完成之后
         if (!pConnect->m_bConnect) NotifyOnClose(pConnect);

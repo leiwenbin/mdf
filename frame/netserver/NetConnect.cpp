@@ -50,7 +50,6 @@ namespace mdf {
          else data中存在host的引用,host不可能被析构
          所以NULL != m_pHostData就一定是代理模式，执行Release()
          */
-        printf("~NetConnect\n");
         if (NULL != m_pHostData) m_pHostData->Release();
         m_pHostData = NULL;
     }
@@ -102,15 +101,7 @@ namespace mdf {
     }
 
     bool NetConnect::IsReadAble() {
-        printf("IsReadAble\n");
-        if (m_bReadAble && (0 < m_recvBuffer.GetLength())) {
-            printf("TRUE\n");
-            return true;
-        } else {
-            printf("FALSE\n");
-            return false;
-        }
-        //return m_bReadAble && (0 < m_recvBuffer.GetLength());
+        return m_bReadAble && (0 < m_recvBuffer.GetLength());
     }
 
     uint32 NetConnect::GetLength() {
