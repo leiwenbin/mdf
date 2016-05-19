@@ -308,9 +308,9 @@ namespace mdf {
         }
     }
 
-    bool NetEngine::OnConnect(int sock, SVR_CONNECT* pSvr) {
+    bool NetEngine::OnConnect(int sock, int listenSock, SVR_CONNECT* pSvr) {
         if (m_noDelay) Socket::SetNoDelay(sock, true);
-        NetConnect* pConnect = new(m_pConnectPool->Alloc()) NetConnect(sock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
+        NetConnect* pConnect = new(m_pConnectPool->Alloc()) NetConnect(sock, listenSock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
         if (NULL == pConnect) {
             closesocket(sock);
             return false;
@@ -576,8 +576,8 @@ namespace mdf {
         pSvr->lastConnect = time(NULL);
         ConnectResult ret = ConnectOtherServer(ip, port, pSvr->sock);
         if (NetEngine::success == ret) {
+            OnConnect(pSvr->sock, pSvr->sock, pSvr);
             pSvr->state = SVR_CONNECT::connected;
-            OnConnect(pSvr->sock, pSvr);
         } else if (NetEngine::waitReulst == ret) {
             pSvr->state = SVR_CONNECT::connectting;
             m_wakeConnectThread.Notify();
@@ -616,6 +616,11 @@ namespace mdf {
             for (; itSvr != it->second.end();) {
                 pSvr = *itSvr;
                 if (SVR_CONNECT::connectting == pSvr->state || SVR_CONNECT::connected == pSvr->state || SVR_CONNECT::unconnectting == pSvr->state) {
+                    if (0 > pSvr->reConnectSecond && SVR_CONNECT::connected == pSvr->state) {
+                        itSvr = it->second.erase(itSvr);
+                        MDF_SAFE_DELETE(pSvr);
+                        continue;
+                    }
                     itSvr++;
                     continue;
                 }
@@ -632,8 +637,8 @@ namespace mdf {
                 pSvr->lastConnect = curTime;
                 ConnectResult ret = ConnectOtherServer(ip, port, pSvr->sock);
                 if (NetEngine::success == ret) {
+                    OnConnect(pSvr->sock, pSvr->sock, pSvr);
                     pSvr->state = SVR_CONNECT::connected;
-                    OnConnect(pSvr->sock, pSvr);
                 } else if (NetEngine::waitReulst == ret) {
                     pSvr->state = SVR_CONNECT::connectting;
                     m_wakeConnectThread.Notify();
@@ -1039,8 +1044,9 @@ namespace mdf {
             return true;
         }
 
+        OnConnect(svrSock, svrSock, pSvr);
         pSvr->state = SVR_CONNECT::connected;
-        OnConnect(svrSock, pSvr);
+
         return true;
     }
 
@@ -1054,7 +1060,7 @@ namespace mdf {
     }
 
     bool NetEngine::AllowAcceptConnection() {
-        return (int) m_connectList.size() < m_averageConnectCount;
+        return m_connectList.size() < (uint32) m_averageConnectCount;
     }
 
 }

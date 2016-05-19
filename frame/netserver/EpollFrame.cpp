@@ -80,7 +80,7 @@ namespace mdf {
                         clientSock.Detach();
                         break;
                     }
-                    OnConnect(clientSock.Detach());
+                    OnConnect(clientSock.Detach(), 0);
                 }
                 if (!((EpollMonitor*) m_pNetMonitor)->AddAccept(listenSock.GetSocket())) {
                     printf("AddAccept (%d) error \n", listenSock.GetSocket());

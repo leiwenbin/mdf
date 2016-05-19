@@ -106,7 +106,7 @@ namespace mdf {
             return false;
             break;
             case STIocp::connect :
-            OnConnect( e.client );
+            OnConnect( e.client, e.sock );
             m_pNetMonitor->AddAccept( e.sock );
             break;
             case STIocp::recv :
@@ -157,7 +157,7 @@ namespace mdf {
                     sockListen.Accept(sockClient);
                     if (INVALID_SOCKET == sockClient.GetSocket()) break;
                     sockClient.SetSockMode();
-                    OnConnect(sockClient.Detach());
+                    OnConnect(sockClient.Detach(), 0);
                 }
                 continue;
             }
@@ -317,9 +317,9 @@ namespace mdf {
         }
     }
 
-    bool STNetEngine::OnConnect(int sock, SVR_CONNECT* pSvr) {
+    bool STNetEngine::OnConnect(int sock, int listenSock, SVR_CONNECT* pSvr) {
         if (m_noDelay) Socket::SetNoDelay(sock, true);
-        STNetConnect* pConnect = new(m_pConnectPool->Alloc()) STNetConnect(sock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
+        STNetConnect* pConnect = new(m_pConnectPool->Alloc()) STNetConnect(sock, listenSock, NULL != pSvr, m_pNetMonitor, this, m_pConnectPool);
         if (NULL == pConnect) {
             closesocket(sock);
             return false;
@@ -601,8 +601,8 @@ namespace mdf {
         pSvr->lastConnect = time(NULL);
         ConnectResult ret = ConnectOtherServer(ip, port, pSvr->sock);
         if (STNetEngine::success == ret) {
+            OnConnect(pSvr->sock, pSvr->sock, pSvr);
             pSvr->state = SVR_CONNECT::connected;
-            OnConnect(pSvr->sock, pSvr);
         } else if (STNetEngine::waitReulst == ret) {
             pSvr->state = SVR_CONNECT::connectting;
         } else //报告失败
@@ -640,12 +640,17 @@ namespace mdf {
             for (; itSvr != it->second.end();) {
                 pSvr = *itSvr;
                 if (SVR_CONNECT::connectting == pSvr->state || SVR_CONNECT::connected == pSvr->state || SVR_CONNECT::unconnectting == pSvr->state) {
+                    if (0 > pSvr->reConnectSecond && SVR_CONNECT::connected == pSvr->state) {
+                        itSvr = it->second.erase(itSvr);
+                        MDF_SAFE_DELETE(pSvr);
+                        continue;
+                    }
                     itSvr++;
                     continue;
                 }
                 if (0 > pSvr->reConnectSecond && 0 != pSvr->lastConnect) {
                     itSvr = it->second.erase(itSvr);
-                    delete pSvr;
+                    MDF_SAFE_DELETE(pSvr);
                     continue;
                 }
                 if (curTime - pSvr->lastConnect < pSvr->reConnectSecond) {
@@ -656,8 +661,8 @@ namespace mdf {
                 pSvr->lastConnect = curTime;
                 ConnectResult ret = ConnectOtherServer(ip, port, pSvr->sock);
                 if (STNetEngine::success == ret) {
+                    OnConnect(pSvr->sock, pSvr->sock, pSvr);
                     pSvr->state = SVR_CONNECT::connected;
-                    OnConnect(pSvr->sock, pSvr);
                 } else if (STNetEngine::waitReulst == ret) {
                     pSvr->state = SVR_CONNECT::connectting;
                 } else //报告失败
@@ -1061,8 +1066,9 @@ namespace mdf {
             return true;
         }
 
+        OnConnect(svrSock, svrSock, pSvr);
         pSvr->state = SVR_CONNECT::connected;
-        OnConnect(svrSock, pSvr);
+
         return true;
     }
 

@@ -39,7 +39,7 @@ namespace mdf {
             switch( e->type )
             {
                 case IOCPMonitor::connect :
-                OnConnect( e->client );
+                OnConnect( e->client, e->listenSock );
                 break;
                 case IOCPMonitor::recv :
                 OnData( e->connectId, e->pData, e->uDataSize );

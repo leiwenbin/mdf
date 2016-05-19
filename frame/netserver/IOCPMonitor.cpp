@@ -136,6 +136,7 @@ namespace mdf {
             if (IOCPMonitor::connect == pOverlapped->completiontype)
             {
                 AddAccept(sock);
+                events[count].listenSock = sock;
             }
             //io事件
             events[count].connectId = pOverlapped->connectId;

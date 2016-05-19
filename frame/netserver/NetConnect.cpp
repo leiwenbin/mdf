@@ -13,7 +13,7 @@ using namespace std;
 
 namespace mdf {
 
-    NetConnect::NetConnect(int sock, bool bIsServer, NetEventMonitor* pNetMonitor, NetEngine* pEngine, MemoryPool* pMemoryPool) : m_socket(sock, Socket::tcp) {
+    NetConnect::NetConnect(int sock, int listenSock, bool bIsServer, NetEventMonitor* pNetMonitor, NetEngine* pEngine, MemoryPool* pMemoryPool) : m_socket(sock, Socket::tcp) {
         m_pMemoryPool = pMemoryPool;
         m_useCount = 1;
         m_pEngine = pEngine;
@@ -31,7 +31,7 @@ namespace mdf {
         m_tCreateTime = m_tLastHeart = time(NULL);
         m_bUnused = true;
 #ifdef WIN32
-        Socket::InitForIOCP(sock);
+        Socket::InitForIOCP(sock, listenSock);
 #endif
         m_socket.InitPeerAddress();
         m_socket.InitLocalAddress();
