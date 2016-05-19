@@ -42,25 +42,6 @@ namespace mdf {
         GetExeDir(m_exeDir, 2048);
     }
 
-    Logger::Logger(const char* name) {
-        m_isInit = false;
-        m_index = 0;
-        m_maxExistDay = 30;
-        m_maxLogSize = 50;
-        m_runLogDir = "";
-        m_name = "";
-        m_bRLogOpened = false;
-        m_fpRunLog = NULL;
-        m_nRunLogCurYear = 0;
-        m_nRunLogCurMonth = 0;
-        m_nRunLogCurDay = 0;
-
-        m_bPrint = false;
-        m_exeDir = new char[2048];
-        GetExeDir(m_exeDir, 2048);
-        SetLogName(m_name.c_str());
-    }
-
     Logger::~Logger() {
         if (NULL != m_fpRunLog) {
             fclose(m_fpRunLog);
@@ -69,14 +50,9 @@ namespace mdf {
         MDF_SAFE_DELETE_ARRAY(m_exeDir);
     }
 
-    bool Logger::SetLogName(const char* name) {
-        if (m_isInit)
-            return false;
-        if (NULL == name)
-            m_name = "";
-        else
-            m_name = name;
-        return CreateLogDir();
+    void Logger::SetLogName(const char* name) {
+        if (m_isInit) return;
+        if (NULL != name) m_name = name;
     }
 
     void Logger::SetMaxLogSize(int maxLogSize) {
@@ -104,13 +80,11 @@ namespace mdf {
         return true;
     }
 
-    bool Logger::CreateLogDir() {
-        if (m_isInit)
-            return false;
+    bool Logger::SetLogDir(const char* logDir) {
+        if (m_isInit) return false;
         m_runLogDir = m_exeDir;
-        if ("" != m_name)
-            //m_runLogDir = m_exeDir + "/" + m_name;
-            m_runLogDir = m_name;
+        if (NULL != logDir)
+            m_runLogDir = logDir;
         else
             m_runLogDir += "/log";
 
@@ -120,12 +94,15 @@ namespace mdf {
     void Logger::RenameMaxLog() {
         time_t cutTime = time(NULL);
         tm* pCurTM = localtime(&cutTime);
-        char log[256];
+        char log[1024] = {0};
 
-        std::string fromat = m_runLogDir + "/%Y-%m-%d.log";
-        strftime(log, 256, fromat.c_str(), pCurTM);
-        unsigned long lsize = GetFileSize(log);
-        if (lsize >= (unsigned long) (1024 * 1024 * m_maxLogSize)) {
+        std::string format = m_runLogDir + "/";
+        if (m_name != "")
+            format += m_name + ".";
+        format += "%Y-%m-%d.log";
+        strftime(log, 1024, format.c_str(), pCurTM);
+        unsigned long size = GetFileSize(log);
+        if (size >= (unsigned long) (1024 * 1024 * m_maxLogSize)) {
             if (m_bRLogOpened) {
                 fclose(m_fpRunLog);
                 m_bRLogOpened = false;
@@ -156,9 +133,12 @@ namespace mdf {
             m_index = 0;
         }
 
-        char strRunLog[256];
-        std::string fromat = m_runLogDir + "/%Y-%m-%d.log";
-        strftime(strRunLog, 256, fromat.c_str(), pCurTM);
+        char strRunLog[1024] = {0};
+        std::string format = m_runLogDir + "/";
+        if (m_name != "")
+            format += m_name + ".";
+        format += "%Y-%m-%d.log";
+        strftime(strRunLog, 1024, format.c_str(), pCurTM);
         m_fpRunLog = fopen(strRunLog, "a");
         m_bRLogOpened = NULL != m_fpRunLog;
 
@@ -263,11 +243,12 @@ namespace mdf {
     bool Logger::Info(LEVEL_LOG level, const char* findKey, const char* format, ...) {
         AutoLock lock(&m_writeMutex);
         if (!m_isInit) {
-            if (!SetLogName(NULL))
+            if (!SetLogDir(NULL))
                 return m_isInit;
         }
 
         DelLog(m_maxExistDay);
+
         RenameMaxLog();
 
         if (!OpenRunLog())
@@ -275,13 +256,13 @@ namespace mdf {
         //取得时间
         time_t cutTime = time(NULL);
         tm* pCurTM = localtime(&cutTime);
-        char strTime[32] = {0};
-        strftime(strTime, 30, "%Y-%m-%d %H:%M:%S", pCurTM);
+        char strTime[64] = {0};
+        strftime(strTime, 64, "%Y-%m-%d %H:%M:%S", pCurTM);
         //取得日志等级
         std::string strLevel;
         switch (level) {
-            case LEVEL_LOG_FAILD:
-                strLevel = "FAILD";
+            case LEVEL_LOG_FAILED:
+                strLevel = "FAILED";
                 break;
             case LEVEL_LOG_ERROR:
                 strLevel = "ERROR";
@@ -328,7 +309,7 @@ namespace mdf {
     bool Logger::StreamInfo(LEVEL_LOG level, const char* findKey, unsigned char* stream, int nLen, const char* format, ...) {
         AutoLock lock(&m_writeMutex);
         if (!m_isInit) {
-            if (!SetLogName(NULL))
+            if (!SetLogDir(NULL))
                 return m_isInit;
         }
 
@@ -345,8 +326,8 @@ namespace mdf {
         //取得日志等级
         std::string strLevel;
         switch (level) {
-            case LEVEL_LOG_FAILD:
-                strLevel = "FAILD";
+            case LEVEL_LOG_FAILED:
+                strLevel = "FAILED";
                 break;
             case LEVEL_LOG_ERROR:
                 strLevel = "ERROR";
@@ -374,10 +355,10 @@ namespace mdf {
         //打印日志内容
         if (m_bPrint) {
             printf("%s Tid:%lu [%s] %s ", strTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
-            va_list ap;
-            va_start(ap, format);
-            vprintf(format, ap);
-            va_end(ap);
+            va_list vap;
+            va_start(vap, format);
+            vprintf(format, vap);
+            va_end(vap);
         }
 
         //写入流

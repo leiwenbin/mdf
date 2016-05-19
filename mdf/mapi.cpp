@@ -18,7 +18,6 @@
 
 #endif
 
-#include <time.h>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -202,7 +201,7 @@ namespace mdf {
 #endif
     }
 
-//返回0时0分0秒的当前日期
+    //返回0时0分0秒的当前日期
     time_t mdf_Date() {
         time_t curTime = time(NULL);
         tm* pTm = localtime(&curTime);
@@ -277,6 +276,7 @@ namespace mdf {
 #endif
     }
 
+    //HASH算法
     unsigned int APHash(const char* str) {
         unsigned int hash = 0;
         int i;
@@ -290,10 +290,12 @@ namespace mdf {
         return (hash & 0x7FFFFFFF);
     }
 
+    //获取内存使用
     double get_mem_use() {
 #ifndef WIN32
         FILE* fd = NULL;
         char buff[1024] = {0};
+        char pattern[1024] = {0};
         MEM_OCCUPY mem;
         MEM_OCCUPY* p_mem = &mem;
         memset(p_mem, 0, sizeof(MEM_OCCUPY));
@@ -301,14 +303,20 @@ namespace mdf {
         fd = fopen("/proc/meminfo", "r");
         if (NULL == fd) return 0;
 
-        fgets(buff, sizeof(buff), fd);
-        sscanf(buff, "%s %lu", p_mem->name, &p_mem->total);
-        fgets(buff, sizeof(buff), fd);
-        sscanf(buff, "%s %lu", p_mem->name2, &p_mem->free);
-        fgets(buff, sizeof(buff), fd);
-        sscanf(buff, "%s %lu", p_mem->name3, &p_mem->buffer);
-        fgets(buff, sizeof(buff), fd);
-        sscanf(buff, "%s %lu", p_mem->name4, &p_mem->cache);
+        while (NULL != fgets(buff, sizeof(buff), fd)) {
+            sscanf(buff, "%s", pattern);
+            if (strcmp(pattern, "MemTotal:") == 0)
+                sscanf(buff, "%s %lu", p_mem->name, &p_mem->total);
+            else if (strcmp(pattern, "MemFree:") == 0)
+                sscanf(buff, "%s %lu", p_mem->name2, &p_mem->free);
+            else if (strcmp(pattern, "Buffers:") == 0)
+                sscanf(buff, "%s %lu", p_mem->name3, &p_mem->buffer);
+            else if (strcmp(pattern, "Cached:") == 0)
+                sscanf(buff, "%s %lu", p_mem->name4, &p_mem->cache);
+
+            memset(pattern, 0, 1024);
+
+        }
 
         fclose(fd); //关闭文件fd
 
@@ -318,25 +326,61 @@ namespace mdf {
 #endif
     }
 
+    //获取CPU使用(每秒)
     double get_cpu_use() {
 #ifndef WIN32
         FILE* fd = NULL;
         char buff[1024] = {0};
-        CPU_OCCUPY cpu_occupy;
+        CPU_OCCUPY cpu_occupy, cpu_occupy_now;
         CPU_OCCUPY* p_cpu_occupy = &cpu_occupy;
         memset(p_cpu_occupy, 0, sizeof(CPU_OCCUPY));
+        CPU_OCCUPY* p_cpu_occupy_now = &cpu_occupy_now;
+        memset(p_cpu_occupy_now, 0, sizeof(CPU_OCCUPY));
 
         fd = fopen("/proc/stat", "r");
         if (NULL == fd) return 0;
         fgets(buff, sizeof(buff), fd);
         sscanf(buff, "%s %u %u %u %u", p_cpu_occupy->name, &p_cpu_occupy->user, &p_cpu_occupy->nice, &p_cpu_occupy->system, &p_cpu_occupy->idle);
 
+        m_sleep(1000);
+        memset(buff, 0, 1024);
+        fseek(fd, 0, SEEK_SET);
+        fgets(buff, sizeof(buff), fd);
+        sscanf(buff, "%s %u %u %u %u", p_cpu_occupy_now->name, &p_cpu_occupy_now->user, &p_cpu_occupy_now->nice, &p_cpu_occupy_now->system, &p_cpu_occupy_now->idle);
+
         fclose(fd);
 
-        return (double) (p_cpu_occupy->user + p_cpu_occupy->nice + p_cpu_occupy->system) / (double) (p_cpu_occupy->user + p_cpu_occupy->nice + p_cpu_occupy->system + p_cpu_occupy->idle) * (double) 100;
+        double use = (double) ((p_cpu_occupy_now->user + p_cpu_occupy_now->nice + p_cpu_occupy_now->system) - (p_cpu_occupy->user + p_cpu_occupy->nice + p_cpu_occupy->system));
+        double all = (double) ((p_cpu_occupy_now->user + p_cpu_occupy_now->nice + p_cpu_occupy_now->system + p_cpu_occupy_now->idle) - (p_cpu_occupy->user + p_cpu_occupy->nice + p_cpu_occupy->system + p_cpu_occupy->idle));
+
+        return use / all * (double) 100;
 #else
         return 0;
 #endif
+    }
+
+    //分割字符串
+    std::vector<std::string> split(std::string str, std::string pattern) {
+        std::vector<std::string> result;
+
+        if (pattern == "") {
+            result.push_back(str);
+            return result;
+        }
+
+        std::string::size_type pos;
+        str += pattern;//扩展字符串以方便操作
+        size_t size = str.length();
+
+        for (size_t i = 0; i < size; i++) {
+            pos = str.find(pattern, i);
+            if (pos < size) {
+                std::string s = str.substr(i, pos - i);
+                result.push_back(s);
+                i = pos + pattern.length() - 1;
+            }
+        }
+        return result;
     }
 
 }
