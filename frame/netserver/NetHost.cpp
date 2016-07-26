@@ -52,12 +52,12 @@ namespace mdf {
     }
 
     //放入某分组
-    void NetHost::InGroup(int groupID) {
+    void NetHost::InGroup(std::string& groupID) {
         m_pConnect->InGroup(groupID);
     }
 
     //从某分组删除
-    void NetHost::OutGroup(int groupID) {
+    void NetHost::OutGroup(std::string& groupID) {
         m_pConnect->OutGroup(groupID);
     }
 

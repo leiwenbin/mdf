@@ -674,7 +674,7 @@ namespace mdf {
     }
 
     //向某组连接广播消息(业务层接口)
-    void NetEngine::BroadcastMsg(int* recvGroupIDs, int recvCount, char* msg, unsigned int msgsize, int* filterGroupIDs, int filterCount) {
+    void NetEngine::BroadcastMsg(std::vector<std::string>* recvGroupIDs, char* msg, unsigned int msgsize, std::vector<std::string>* filterGroupIDs) {
         //////////////////////////////////////////////////////////////////////////
         //关闭无心跳的连接
         ConnectList::iterator it;
@@ -684,7 +684,7 @@ namespace mdf {
         AutoLock lock(&m_connectsMutex);
         for (it = m_connectList.begin(); it != m_connectList.end(); it++) {
             pConnect = it->second;
-            if (!pConnect->IsInGroups(recvGroupIDs, recvCount) || pConnect->IsInGroups(filterGroupIDs, filterCount)) continue;
+            if (!pConnect->IsInGroups(recvGroupIDs) || pConnect->IsInGroups(filterGroupIDs)) continue;
             recverList.push_back(pConnect);
             AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
         }

@@ -177,23 +177,21 @@ namespace mdf {
         return m_bIsServer;
     }
 
-    void NetConnect::InGroup(int groupID) {
-        m_groups.insert(map<int, int>::value_type(groupID, groupID));
+    void NetConnect::InGroup(std::string& groupID) {
+        m_groups.insert(map<std::string, int>::value_type(groupID, 0));
     }
 
-    void NetConnect::OutGroup(int groupID) {
-        map<int, int>::iterator it;
+    void NetConnect::OutGroup(std::string& groupID) {
+        map<std::string, int>::iterator it;
         it = m_groups.find(groupID);
-        if (it == m_groups.end()) return;
-        m_groups.erase(it);
+        if (it != m_groups.end()) m_groups.erase(it);
     }
 
-    bool NetConnect::IsInGroups(int* groups, int count) {
-        int i = 0;
-        for (i = 0; i < count; i++) {
-            if (m_groups.end() != m_groups.find(groups[i])) return true;
+    bool NetConnect::IsInGroups(std::vector<std::string>* groups) {
+        if (NULL == groups) return false;
+        for (uint32 i = 0; i < groups->size(); i++) {
+            if (m_groups.end() != m_groups.find(groups->at(i))) return true;
         }
-
         return false;
     }
 
