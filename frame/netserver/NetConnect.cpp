@@ -37,6 +37,7 @@ namespace mdf {
         m_socket.InitLocalAddress();
         m_pHostData = NULL;
         m_autoFreeData = true;
+        m_IdleState = false;
         m_pSvrInfo = NULL;
     }
 
@@ -283,6 +284,14 @@ namespace mdf {
 
     void* NetConnect::GetSvrInfo() {
         return m_pSvrInfo;
+    }
+
+    void NetConnect::SetIdleState() {
+        m_IdleState = true;
+    }
+
+    bool NetConnect::GetIdleState() {
+        return m_IdleState;
     }
 
 } //namespace mdf

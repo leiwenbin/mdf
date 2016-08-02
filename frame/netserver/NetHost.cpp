@@ -94,4 +94,8 @@ namespace mdf {
         return m_pConnect->GetCreateTime();
     }
 
+    bool NetHost::GetIdleState() {
+        return m_pConnect->GetIdleState();
+    }
+
 } // namespace mdf

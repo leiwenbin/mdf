@@ -10,6 +10,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <frame/netserver/HostData.h>
 
 #include "../../../include/mdf/mapi.h"
 #include "../../../include/mdf/Socket.h"
@@ -29,7 +30,7 @@ namespace mdf {
         m_stop = true; //停止标志
         m_startError = "";
         m_nHeartTime = 0; //心跳间隔(S),默认不检查
-        m_nFreeTime = 0; //空闲连接时间(S),默认不检查
+        m_nIdleTime = 0; //空闲连接时间(S),默认不检查
         m_pNetMonitor = NULL;
         m_ioThreadCount = 16; //网络io线程数量
         m_workThreadCount = 16; //工作线程数量
@@ -62,8 +63,8 @@ namespace mdf {
     }
 
     //设置防空连接时间,只有设置了心跳时间才有效
-    void NetEngine::SetFreeTime(int nSecond) {
-        m_nFreeTime = nSecond;
+    void NetEngine::SetIdleTime(int nSecond) {
+        m_nIdleTime = nSecond;
     }
 
     //设置网络IO线程数量
@@ -168,7 +169,7 @@ namespace mdf {
         //////////////////////////////////////////////////////////////////////////
         //关闭无心跳的连接
         ConnectList::iterator it;
-        NetConnect* pConnect;
+        NetConnect* pConnect = NULL;
         time_t tCurTime = 0;
         tCurTime = time(NULL);
         time_t tLastHeart = 0;
@@ -184,8 +185,10 @@ namespace mdf {
                     bClose = true;
 
                 //检查空连接
-                if (m_nFreeTime > 0 && tCurTime >= tLastHeart && pConnect->IsUnused() && tCurTime - tLastHeart >= m_nFreeTime) //空连接
+                if (m_nIdleTime > 0 && tCurTime >= tLastHeart && pConnect->IsUnused() && tCurTime - tLastHeart >= m_nIdleTime) {
+                    pConnect->SetIdleState();
                     bClose = true;
+                }
             }
 
             //无心跳/连接已断开/空连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
@@ -193,7 +196,7 @@ namespace mdf {
                 it++;
                 continue;
             }
-            CloseConnect(it->second);
+            CloseConnect(pConnect);
             it = m_connectList.begin();
         }
     }

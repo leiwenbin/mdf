@@ -80,8 +80,8 @@ namespace mdf {
     }
 
     //设置防空连接时间
-    void NetServer::SetFreeTime(int nSecond) {
-        m_pNetCard->SetFreeTime(nSecond);
+    void NetServer::SetIdleTime(int nSecond) {
+        m_pNetCard->SetIdleTime(nSecond);
     }
 
     //设置网络IO线程数量
