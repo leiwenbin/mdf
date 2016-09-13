@@ -36,6 +36,7 @@ namespace mdf {
         m_workThreadCount = 16; //工作线程数量
         m_pNetServer = NULL;
         m_averageConnectCount = 5000;
+        m_maxConnectCount = 10000;
         m_nextConnectId = 0;
         m_noDelay = false;
 #ifndef WIN32
@@ -55,6 +56,11 @@ namespace mdf {
     //设置平均连接数
     void NetEngine::SetAverageConnectCount(int count) {
         m_averageConnectCount = count;
+    }
+
+    //设置最大连接数
+    void NetEngine::SetMaxConnectCount(int count) {
+        m_maxConnectCount = count;
     }
 
     //设置心跳时间
@@ -687,9 +693,9 @@ namespace mdf {
         AutoLock lock(&m_connectsMutex);
         for (it = m_connectList.begin(); it != m_connectList.end(); it++) {
             pConnect = it->second;
+            AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
             if (!pConnect->IsInGroups(recvGroupIDs) || pConnect->IsInGroups(filterGroupIDs)) continue;
             recverList.push_back(pConnect);
-            AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
         }
         lock.Unlock();
 
@@ -700,6 +706,30 @@ namespace mdf {
             if (pConnect->m_bConnect) pConnect->SendData((const unsigned char*) msg, msgsize);
             pConnect->Release(); //使用完毕释放共享对象
         }
+    }
+
+    //向某组连接广播消息(业务层接口),反馈失败列表
+    void NetEngine::BroadcastMsg(std::vector<std::string>* recvGroupIDs, char* msg, unsigned int msgsize, std::vector<std::string>* filterGroupIDs, std::vector<int64>* failedList) {
+        ConnectList::iterator it;
+        NetConnect* pConnect;
+        int64 sock;
+        //加锁向队列中的连接开始广播
+        AutoLock lock(&m_connectsMutex);
+        for (it = m_connectList.begin(); it != m_connectList.end(); it++) {
+            sock = it->first;
+            pConnect = it->second;
+            AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
+            if (!pConnect->IsInGroups(recvGroupIDs) || pConnect->IsInGroups(filterGroupIDs)) continue;
+            if (pConnect->m_bConnect) {
+                if (!pConnect->SendData((const unsigned char*) msg, msgsize)) {
+                    //发送数据失败加入失败列表
+                    if (NULL != failedList)
+                        failedList->push_back(sock);
+                }
+            }
+            pConnect->Release(); //使用完毕释放共享对象
+        }
+        lock.Unlock();
     }
 
     //向某主机发送消息(业务层接口)
@@ -1063,7 +1093,7 @@ namespace mdf {
     }
 
     bool NetEngine::AllowAcceptConnection() {
-        return m_connectList.size() < (uint32) m_averageConnectCount;
+        return m_connectList.size() < (uint32) m_maxConnectCount;
     }
 
 }

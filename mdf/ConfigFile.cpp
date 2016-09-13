@@ -16,6 +16,7 @@ namespace mdf {
         m_strName = "";
         m_pFile = NULL;
         m_exeDir = new char[2048];
+        memset(m_exeDir, 0, 2048);
         GetExeDir(m_exeDir, 2048);
     }
 
@@ -23,6 +24,7 @@ namespace mdf {
         m_strName = "";
         m_pFile = NULL;
         m_exeDir = new char[2048];
+        memset(m_exeDir, 0, 2048);
         GetExeDir(m_exeDir, 2048);
         mdf_assert(ReadConfig(strName));
     }
@@ -32,8 +34,10 @@ namespace mdf {
         MDF_SAFE_DELETE_ARRAY(m_exeDir);
     }
 
-    bool ConfigFile::ReadConfig(const char* fileName) {
-        if ("" != m_strName) return false; //已经读取了配置
+    bool ConfigFile::ReadConfig(const char* fileName, bool force) {
+        if (!force) {
+            if ("" != m_strName) return false; //已经读取了配置
+        }
         if (NULL == fileName) return false;
         m_strName = m_exeDir;
         m_strName += "/";
@@ -96,7 +100,8 @@ namespace mdf {
             if ('[' == line.c_str()[0] && ']' == line.c_str()[line.size() - 1]) {
                 if ('/' == line.c_str()[1]) //段读取完成
                 {
-                    m_sections.insert(CFGSectionMap::value_type(section.m_name, section));
+                    //m_sections.insert(CFGSectionMap::value_type(section.m_name, section));
+                    m_sections[section.m_name] = section;
                     continue;
                 }
                 //读取新段
@@ -127,12 +132,17 @@ namespace mdf {
             item.m_description = m_description;
             item.m_index = (int) section.m_content.size();
             item.m_valid = true;
-            section.m_content.insert(ConfigMap::value_type(name, item));
+            //section.m_content.insert(ConfigMap::value_type(name, item));
+            section.m_content[name] = item;
             m_description = "";
         }
         Close();
 
         return true;
+    }
+
+    CFGSection::CFGSection() {
+
     }
 
     CFGSection::CFGSection(const char* name, int index) {

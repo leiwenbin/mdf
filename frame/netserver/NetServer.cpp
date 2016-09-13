@@ -74,6 +74,11 @@ namespace mdf {
         m_pNetCard->SetAverageConnectCount(count);
     }
 
+    //设置最大连接数
+    void NetServer::SetMaxConnectCount(int count) {
+        m_pNetCard->SetMaxConnectCount(count);
+    }
+
     //设置心跳时间
     void NetServer::SetHeartTime(int nSecond) {
         m_pNetCard->SetHeartTime(nSecond);
@@ -107,6 +112,11 @@ namespace mdf {
     //向某组连接广播消息
     void NetServer::BroadcastMsg(std::vector<std::string>* recvGroupIDs, char* msg, unsigned int msgsize, std::vector<std::string>* filterGroupIDs) {
         m_pNetCard->BroadcastMsg(recvGroupIDs, msg, msgsize, filterGroupIDs);
+    }
+
+    //返回发送失败列表的向某组连接广播消息
+    void NetServer::BroadcastMsg(std::vector<std::string>* recvGroupIDs, char* msg, unsigned int msgsize, std::vector<std::string>* filterGroupIDs, std::vector<int64>* failedList) {
+        m_pNetCard->BroadcastMsg(recvGroupIDs, msg, msgsize, filterGroupIDs, failedList);
     }
 
     //向某主机发送消息
