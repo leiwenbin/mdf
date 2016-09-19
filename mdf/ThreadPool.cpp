@@ -1,6 +1,5 @@
 ﻿#include "../../include/mdf/ThreadPool.h"
 #include "../../include/mdf/MemoryPool.h"
-#include "../../include/mdf/Task.h"
 
 using namespace std;
 
@@ -70,10 +69,10 @@ namespace mdf {
     }
 
     void ThreadPool::Stop() {
-        AutoLock lock(&m_threadsMutex);
         AutoLock lockTask(&m_tasksMutex);
         m_tasks.clear(); //清空任务
 
+        AutoLock lock(&m_threadsMutex);
         threadMaps::iterator it = m_threads.begin();
         //全部设为停止
         for (it = m_threads.begin(); it != m_threads.end(); it++)
@@ -116,8 +115,8 @@ namespace mdf {
     }
 
     void ThreadPool::PushTask(Task* pTask) {
-        AutoLock lockThread(&m_threadsMutex);    //如果有线程正在对线程列队进行操作必须互斥
-        AutoLock lock(&m_tasksMutex);
+        //AutoLock lockThread(&m_threadsMutex);
+        AutoLock lock(&m_tasksMutex);  //如果有线程正在对线程列队进行操作必须互斥
         m_tasks.push_back(pTask);
         m_sigNewTask.Notify();
     }
