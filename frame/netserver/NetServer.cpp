@@ -141,6 +141,16 @@ namespace mdf {
         return m_pNetCard->GetConnectionCount();
     }
 
+    //获取网络IO线程池任务数
+    uint32 NetServer::GetNetIOTaskCount() {
+        return m_pNetCard->GetNetIOTaskCount();
+    }
+
+    //获取工作线程池任务数
+    uint32 NetServer::GetWorkTaskCount() {
+        return m_pNetCard->GetWorkTaskCount();
+    }
+
     const char* NetServer::GetInitError() {
         return m_pNetCard->GetInitError();
     }

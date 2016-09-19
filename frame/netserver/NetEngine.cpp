@@ -1096,6 +1096,14 @@ namespace mdf {
         return m_connectList.size() < (uint32) m_maxConnectCount;
     }
 
+    uint32 NetEngine::GetNetIOTaskCount() {
+        return m_ioThreads.GetTaskCount();
+    }
+
+    uint32 NetEngine::GetWorkTaskCount() {
+        return m_workThreads.GetTaskCount();
+    }
+
 }
 // namespace mdf
 
