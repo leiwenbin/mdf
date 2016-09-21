@@ -205,15 +205,20 @@ namespace mdf {
     time_t mdf_Date() {
         time_t curTime = time(NULL);
         tm* pTm = localtime(&curTime);
-        char hour[32];
-        char mintue[32];
-        char second[32];
+        char hour[32] = {0};
+        char minute[32] = {0};
+        char second[32] = {0};
         strftime(hour, 30, "%H", pTm);
-        strftime(mintue, 30, "%M", pTm);
+        strftime(minute, 30, "%M", pTm);
         strftime(second, 30, "%S", pTm);
-        int sumSecond = atoi(hour) * 3600 + atoi(mintue) * 60 + atoi(second);
+        int sumSecond = atoi(hour) * 3600 + atoi(minute) * 60 + atoi(second);
         curTime -= sumSecond;
         return curTime;
+    }
+
+    //返回当前日时间（精确到秒）
+    time_t mdf_Time() {
+        return time(NULL);
     }
 
     bool GetExeDir(char* exeDir, int size) {
