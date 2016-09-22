@@ -94,8 +94,19 @@ namespace mdf {
         return m_pConnect->GetCreateTime();
     }
 
+    //获取空连接状态
     bool NetHost::GetIdleState() {
         return m_pConnect->GetIdleState();
+    }
+
+    //获取发送缓冲区的数据长度
+    uint32 NetHost::GetSendBufferDataLength() {
+        return m_pConnect->GetSendBuffUsedLength();
+    }
+
+    //获取接收缓冲区的数据长度
+    uint32 NetHost::GetRecvBufferDataLength() {
+        return m_pConnect->GetLength();
     }
 
 } // namespace mdf

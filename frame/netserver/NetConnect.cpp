@@ -109,6 +109,10 @@ namespace mdf {
         return m_recvBuffer.GetLength();
     }
 
+    uint32 NetConnect::GetSendBuffUsedLength() {
+        return m_sendBuffer.GetLength();
+    }
+
     bool NetConnect::ReadData(unsigned char* pMsg, unsigned int uLength, bool bClearCache) {
         m_bReadAble = m_recvBuffer.ReadData(pMsg, uLength, bClearCache);
 
