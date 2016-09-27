@@ -174,7 +174,7 @@ namespace mdf {
         if (0 >= m_nHeartTime) return; //无心跳机制
         //////////////////////////////////////////////////////////////////////////
         //关闭无心跳的连接
-        ConnectList::iterator it;
+        ConnectList::iterator it, itTmp;
         NetConnect* pConnect = NULL;
         time_t tCurTime = 0;
         tCurTime = time(NULL);
@@ -198,12 +198,19 @@ namespace mdf {
             }
 
             //无心跳/连接已断开/空连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
-            if (!bClose) {
+            if (bClose) {
+                itTmp = ++it;
+                CloseConnect(pConnect);
+                it = itTmp;
+            } else {
+                ++it;
+            }
+            /*if (!bClose) {
                 it++;
                 continue;
             }
             CloseConnect(pConnect);
-            it = m_connectList.begin();
+            it = m_connectList.begin();*/
         }
     }
 
