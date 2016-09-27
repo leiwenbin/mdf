@@ -36,6 +36,7 @@ namespace mdf {
         m_nRunLogCurYear = 0;
         m_nRunLogCurMonth = 0;
         m_nRunLogCurDay = 0;
+        m_lastDelTime = mdf_Date();
 
         m_bPrint = false;
         m_exeDir = new char[2048];
@@ -169,6 +170,9 @@ namespace mdf {
         if (maxExistDay < 1)
             return;
         time_t curTime = mdf_Date();
+        if (curTime - m_lastDelTime < 86400)
+            return;
+        m_lastDelTime = curTime;
         curTime -= 86400 * (maxExistDay - 1);
 
 #ifdef WIN32
