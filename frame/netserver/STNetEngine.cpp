@@ -331,7 +331,8 @@ namespace mdf {
         //加入管理列表
         pConnect->RefreshHeart();
         AtomAdd(&pConnect->m_useCount, 1); //被m_connectList访问
-        pair<ConnectList::iterator, bool> ret = m_connectList.insert(ConnectList::value_type(pConnect->GetSocket()->GetSocket(), pConnect));
+        //pair<ConnectList::iterator, bool> ret = m_connectList.insert(ConnectList::value_type(pConnect->GetSocket()->GetSocket(), pConnect));
+        m_connectList.insert(ConnectList::value_type(pConnect->GetSocket()->GetSocket(), pConnect));
         //执行业务
         STNetHost accessHost = pConnect->m_host; //被引擎访问，局部变量离开时，析构函数自动释放访问
         m_pNetServer->OnConnect(pConnect->m_host);
@@ -876,12 +877,11 @@ namespace mdf {
          将所有监听中的句柄从epoll监听队列删除
          将所有放入epoll监听队列失败的句柄，认为是可读可写的，去尝试一下链接是否成功
          */
-        errCode = errno; //epoll_wait失败时状态
-        volatile int delSock = 0;
+        //volatile int delSock = 0;
         volatile int delError = 0;
         for (i = 0; i < clientCount; i++) {
             if (clientList[i]->inEpoll) {
-                delSock = clientList[i]->sock;
+                //delSock = clientList[i]->sock;
                 clientList[i]->inEpoll = false;
                 delError = epoll_ctl(m_hEPoll, EPOLL_CTL_DEL, clientList[i]->sock, NULL);
                 mdf_assert(0 == delError); //不应该删除失败，如果失败强制崩溃
@@ -980,8 +980,7 @@ namespace mdf {
     }
 
     bool STNetEngine::ConnectIsFinished(SVR_CONNECT* pSvr, bool readable, bool sendable, int api, int errorCode) {
-        int reason = 0;
-        bool successed = true;
+        bool success = true;
         int nSendSize0 = 0;
         int sendError0 = 0;
         char buf[256];
@@ -1002,7 +1001,8 @@ namespace mdf {
 #else
                 sendError0 = errno;
 #endif
-                successed = false;
+                printf("send error code:%d\n", sendError0);
+                success = false;
             }
         }
         if (readable) {
@@ -1014,7 +1014,8 @@ namespace mdf {
 #else
                 recvError0 = errno;
 #endif
-                successed = false;
+                printf("recv error code:%d\n", recvError0);
+                success = false;
             }
 
             nRecvSize1 = recv(svrSock, buf, 1, MSG_PEEK);
@@ -1025,42 +1026,41 @@ namespace mdf {
 #else
                 recvError1 = errno;
 #endif
-                successed = false;
+                printf("recv error code:%d\n", recvError1);
+                success = false;
             }
         }
 
         if (0 >= api) {
-            successed = false;
-            reason = 1;
-        } else if (successed) {
+            errorCode = 1;
+            success = false;
+        } else if (success) {
             if (!readable && !sendable) //sock尚未返回结果
-            {
                 return false;
-            }
             sockaddr_in sockAddr;
             memset(&sockAddr, 0, sizeof(sockAddr));
             socklen_t nSockAddrLen = sizeof(sockAddr);
             if (SOCKET_ERROR == getsockname(svrSock, (sockaddr*) &sockAddr, &nSockAddrLen)) {
-                reason = 2;
-                successed = false;
+                errorCode = 2;
+                success = false;
             } else {
                 strcpy(clientIP, inet_ntoa(sockAddr.sin_addr));
 
                 if (0 == strcmp("0.0.0.0", clientIP)) {
-                    reason = 3;
-                    successed = false;
+                    errorCode = 3;
+                    success = false;
                 } else {
                     memset(&sockAddr, 0, sizeof(sockAddr));
                     nSockAddrLen = sizeof(sockAddr);
                     if (SOCKET_ERROR == getpeername(svrSock, (sockaddr*) &sockAddr, &nSockAddrLen)) {
-                        reason = 4;
-                        successed = false;
+                        errorCode = 4;
+                        success = false;
                     } else
                         strcpy(serverIP, inet_ntoa(sockAddr.sin_addr));
                 }
             }
         }
-        if (!successed) {
+        if (!success) {
             pSvr->state = SVR_CONNECT::unconnectting;
             ConnectFailed(pSvr);
             return true;

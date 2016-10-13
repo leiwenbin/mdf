@@ -336,15 +336,12 @@ namespace mdf {
         pConnect->GetSocket()->SetSockMode();
         //加入管理列表
         AutoLock lock(&m_connectsMutex);
-        int64 connectId = -1;
-        while (-1 == connectId) //跳过预留ID
-        {
-            connectId = m_nextConnectId;
-            m_nextConnectId++;
-        }
+        int64 connectId = m_nextConnectId;
+        m_nextConnectId++;
         pConnect->SetID(connectId);
         //pConnect->RefreshHeart();
-        pair<ConnectList::iterator, bool> ret = m_connectList.insert(ConnectList::value_type(connectId, pConnect));
+        //pair<ConnectList::iterator, bool> ret = m_connectList.insert(ConnectList::value_type(connectId, pConnect));
+        m_connectList.insert(ConnectList::value_type(connectId, pConnect));
         AtomAdd(&pConnect->m_useCount, 1); //业务层先获取访问
         lock.Unlock();
         //执行业务
@@ -906,18 +903,16 @@ namespace mdf {
          将所有监听中的句柄从epoll监听队列删除
          将所有放入epoll监听队列失败的句柄，认为是可读可写的，去尝试一下链接是否成功
          */
-        errCode = errno; //epoll_wait失败时状态
-        volatile int delSock = 0;
+        //volatile int delSock = 0;
         volatile int delError = 0;
         for (i = 0; i < clientCount; i++) {
             if (clientList[i]->inEpoll) {
-                delSock = clientList[i]->sock;
+                //delSock = clientList[i]->sock;
                 clientList[i]->inEpoll = false;
                 delError = epoll_ctl(m_hEPoll, EPOLL_CTL_DEL, clientList[i]->sock, NULL);
                 mdf_assert(0 == delError); //不应该删除失败，如果失败强制崩溃
                 if (0 >= count) ConnectIsFinished(clientList[i], true, true, count, errCode); //不能早于epoll_ctl删除，原因同过程A过程B执行顺序
-            } else //添加到Epoll失败的句柄，认为可读可写，进入尝试取IP等方法
-            {
+            } else { //添加到Epoll失败的句柄，认为可读可写，进入尝试取IP等方法
                 ConnectIsFinished(clientList[i], true, true, 1, errCode);
             }
         }
@@ -1001,8 +996,7 @@ namespace mdf {
     }
 
     bool NetEngine::ConnectIsFinished(SVR_CONNECT* pSvr, bool readable, bool sendable, int api, int errorCode) {
-        int reason = 0;
-        bool successed = true;
+        bool success = true;
         int nSendSize0 = 0;
         int sendError0 = 0;
         char buf[256];
@@ -1023,7 +1017,8 @@ namespace mdf {
 #else
                 sendError0 = errno;
 #endif
-                successed = false;
+                printf("send error code:%d\n", sendError0);
+                success = false;
             }
         }
         if (readable) {
@@ -1035,7 +1030,8 @@ namespace mdf {
 #else
                 recvError0 = errno;
 #endif
-                successed = false;
+                printf("recv error code:%d\n", recvError0);
+                success = false;
             }
 
             nRecvSize1 = (int) recv(svrSock, buf, 1, MSG_PEEK);
@@ -1046,39 +1042,40 @@ namespace mdf {
 #else
                 recvError1 = errno;
 #endif
-                successed = false;
+                printf("recv error code:%d\n", recvError1);
+                success = false;
             }
         }
 
         if (0 >= api) {
-            successed = false;
-            reason = 1;
-        } else if (successed) {
+            errorCode = 1;
+            success = false;
+        } else if (success) {
             if (!readable && !sendable) //sock尚未返回结果
                 return false;
             struct sockaddr_in sockAddr_in;
             memset(&sockAddr_in, 0, sizeof(sockaddr_in));
             socklen_t nSockAddrLen = sizeof(sockaddr_in);
             if (SOCKET_ERROR == getsockname(svrSock, (sockaddr*) &sockAddr_in, &nSockAddrLen)) {
-                reason = 2;
-                successed = false;
+                errorCode = 2;
+                success = false;
             } else {
                 strcpy(clientIP, (const char*) inet_ntoa(sockAddr_in.sin_addr));
                 if (0 == strcmp("0.0.0.0", clientIP)) {
-                    reason = 3;
-                    successed = false;
+                    errorCode = 3;
+                    success = false;
                 } else {
                     memset(&sockAddr_in, 0, sizeof(sockaddr_in));
                     nSockAddrLen = sizeof(sockaddr_in);
                     if (SOCKET_ERROR == getpeername(svrSock, (sockaddr*) &sockAddr_in, &nSockAddrLen)) {
-                        reason = 4;
-                        successed = false;
+                        errorCode = 4;
+                        success = false;
                     } else
                         strcpy(serverIP, (const char*) inet_ntoa(sockAddr_in.sin_addr));
                 }
             }
         }
-        if (!successed) {
+        if (!success) {
             pSvr->state = SVR_CONNECT::unconnectting;
             m_workThreads.Accept(Executor::Bind(&NetEngine::ConnectFailed), this, pSvr);
             return true;

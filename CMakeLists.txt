@@ -2,6 +2,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(BaseSocket)
 
+IF(APPLE)
+ELSEIF(UNIX)
+    SET(CMAKE_C_COMPILER "/opt/rh/devtoolset-2/root/usr/bin/gcc")
+    SET(CMAKE_CXX_COMPILER "/opt/rh/devtoolset-2/root/usr/bin/c++")
+ENDIF()
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -fPIC -Wall -D_REENTRANT -DUSE_APACHE -DNO_STRING_CIPHER ")
 SET(TARGET "basesocket")
 SET(LIBRARY_OUTPUT_PATH ../lib/release_linux/libBase)
@@ -15,5 +21,5 @@ INCLUDE_DIRECTORIES(../include)
 
 ADD_LIBRARY(${TARGET} STATIC ${SOURCE_DIRS_NET} ${SOURCE_DIRS_MDF})
 
-TARGET_LINK_LIBRARIES(${TARGET} -lnsl -lc -lm -lpthread -lstdc++)
+TARGET_LINK_LIBRARIES(${TARGET} -std=c++11 -lnsl -lc -lm -lpthread -lstdc++)
 
