@@ -121,7 +121,7 @@ namespace mdf {
                 //对于recv send则加入到io列表，统一调度
                 it = ioList.find(events[i].data.u64);
                 if (it != ioList.end()) continue;
-                ioList.insert(map<int64, int>::value_type(events[i].data.u64, 1)); //增加可io的对象
+                ioList.insert(map<int64, int>::value_type((int64) events[i].data.u64, 1)); //增加可io的对象
             }
 
             //遍历ioList，执行1次io
@@ -176,7 +176,7 @@ namespace mdf {
                 //对于recv send则加入到io列表，统一调度
                 it = ioList.find(events[i].data.u64);
                 if (it != ioList.end()) continue;
-                ioList.insert(map<int64, int>::value_type(events[i].data.u64, 2)); //增加可io的对象
+                ioList.insert(map<int64, int>::value_type((int64) events[i].data.u64, 2)); //增加可io的对象
             }
 
             //遍历ioList，执行1次io
