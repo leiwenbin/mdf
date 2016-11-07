@@ -261,7 +261,9 @@ namespace mdf {
         time_t cutTime = time(NULL);
         tm* pCurTM = localtime(&cutTime);
         char strTime[64] = {0};
+        char strLogTime[64] = {0};
         strftime(strTime, 64, "%Y-%m-%d %H:%M:%S", pCurTM);
+        sprintf(strLogTime, "%s.%lu", strTime, (MillTime() - cutTime * 1000));
         //取得日志等级
         std::string strLevel;
         switch (level) {
@@ -285,7 +287,7 @@ namespace mdf {
                 break;
         }
         //写入日志内容
-        fprintf(m_fpRunLog, "%s Tid:%lu [%s] %s ", strTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
+        fprintf(m_fpRunLog, "%s Tid:%lu [%s] %s ", strLogTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
         va_list ap;
         va_start(ap, format);
         vfprintf(m_fpRunLog, format, ap);
@@ -299,11 +301,11 @@ namespace mdf {
 
         //打印日志内容
         if (m_bPrint) {
-            printf("%s Tid:%lu [%s] %s ", strTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
-            va_list ap;
-            va_start(ap, format);
-            vprintf(format, ap);
-            va_end(ap);
+            printf("%s Tid:%lu [%s] %s ", strLogTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
+            va_list vaList;
+            va_start(vaList, format);
+            vprintf(format, vaList);
+            va_end(vaList);
             printf("\n");
         }
 
@@ -325,8 +327,10 @@ namespace mdf {
         //取得时间
         time_t cutTime = time(NULL);
         tm* pCurTM = localtime(&cutTime);
-        char strTime[32] = {0};
-        strftime(strTime, 30, "%Y-%m-%d %H:%M:%S", pCurTM);
+        char strTime[64] = {0};
+        char strLogTime[64] = {0};
+        strftime(strTime, 64, "%Y-%m-%d %H:%M:%S", pCurTM);
+        sprintf(strLogTime, "%s.%lu", strTime, (MillTime() - cutTime * 1000));
         //取得日志等级
         std::string strLevel;
         switch (level) {
@@ -350,7 +354,7 @@ namespace mdf {
                 break;
         }
         //写入日志内容
-        fprintf(m_fpRunLog, "%s Tid:%lu [%s] %s ", strTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
+        fprintf(m_fpRunLog, "%s Tid:%lu [%s] %s ", strLogTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
         va_list ap;
         va_start(ap, format);
         vfprintf(m_fpRunLog, format, ap);
@@ -358,7 +362,7 @@ namespace mdf {
 
         //打印日志内容
         if (m_bPrint) {
-            printf("%s Tid:%lu [%s] %s ", strTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
+            printf("%s Tid:%lu [%s] %s ", strLogTime, (unsigned long) CurThreadId(), strLevel.c_str(), findKey);
             va_list vap;
             va_start(vap, format);
             vprintf(format, vap);
