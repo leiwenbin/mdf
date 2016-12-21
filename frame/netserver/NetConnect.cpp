@@ -37,7 +37,8 @@ namespace mdf {
         m_socket.InitLocalAddress();
         m_pHostData = NULL;
         m_autoFreeData = true;
-        m_IdleState = false;
+        m_bIdleState = false;
+        m_bNormalDisconnect = false;
         m_pSvrInfo = NULL;
     }
 
@@ -291,11 +292,19 @@ namespace mdf {
     }
 
     void NetConnect::SetIdleState() {
-        m_IdleState = true;
+        m_bIdleState = true;
     }
 
     bool NetConnect::GetIdleState() {
-        return m_IdleState;
+        return m_bIdleState;
+    }
+
+    void NetConnect::SetNormalDisconnect() {
+        m_bNormalDisconnect = true;
+    }
+
+    bool NetConnect::GetNormalDisconnect() {
+        return m_bNormalDisconnect;
     }
 
 } //namespace mdf

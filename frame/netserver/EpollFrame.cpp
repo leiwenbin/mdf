@@ -211,6 +211,7 @@ namespace mdf {
             pWriteBuf = pConnect->PrepareBuffer(BUFBLOCK_SIZE);
             nRecvLen = pConnect->GetSocket()->Receive(pWriteBuf, BUFBLOCK_SIZE);
             if (nRecvLen < 0) return unconnect;
+
             if (0 == nRecvLen) {
                 int64 connectId = pConnect->GetID();
                 if (!m_pNetMonitor->AddRecv(pConnect->GetSocket()->GetSocket(), (char*) &connectId, sizeof(int64))) return unconnect;

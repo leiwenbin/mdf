@@ -362,6 +362,7 @@ namespace mdf {
             AutoLock lock(&m_connectsMutex);
             ConnectList::iterator itNetConnect = m_connectList.find(connectId);
             if (itNetConnect == m_connectList.end()) return 0; //底层已经主动断开
+            itNetConnect->second->SetNormalDisconnect();
             CloseConnect(itNetConnect->second);
             pConnect->Release();
             return 0;
@@ -400,6 +401,7 @@ namespace mdf {
                 AutoLock lock(&m_connectsMutex);
                 ConnectList::iterator itNetConnect = m_connectList.find(connectId);
                 if (itNetConnect == m_connectList.end()) return 0; //底层已经主动断开
+                itNetConnect->second->SetNormalDisconnect();
                 CloseConnect(itNetConnect->second);
             }
         }
@@ -444,6 +446,8 @@ namespace mdf {
         try {
             cs = RecvData(pConnect, pData, uSize); //派生类实现
             if (unconnect == cs) {
+                // printf("OnData, socket = %ld\n", pConnect->GetID());
+                pConnect->SetNormalDisconnect();
                 pConnect->Release(); //使用完毕释放共享对象
                 OnClose(connectId);
                 return cs;
@@ -507,6 +511,7 @@ namespace mdf {
         AutoLock lock(&m_connectsMutex);
         ConnectList::iterator itNetConnect = m_connectList.find(connectId);
         if (itNetConnect == m_connectList.end()) return; //底层已经主动断开
+        itNetConnect->second->SetNormalDisconnect();
         CloseConnect(itNetConnect->second);
     }
 

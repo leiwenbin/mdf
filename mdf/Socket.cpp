@@ -284,10 +284,12 @@ namespace mdf {
         if (bCheckDataLength)
             nFlag = MSG_PEEK;
         nResult = (int) recv(m_hSocket, (char*) lpBuf, nBufLen, nFlag);
-        if (0 == nResult)
-            return seSocketClose; //断开连接
-        if (SOCKET_ERROR != nResult)
+        if (0 < nResult)
             return nResult; //无异常发生
+        else if (0 == nResult)
+            // printf("result = %d, errno = %d socket = %d\n", nResult, errno, m_hSocket);
+            return seSocketClose; //断开连接
+
 
         //socket发生异常
 #ifdef WIN32
@@ -295,8 +297,10 @@ namespace mdf {
         if (WSAEWOULDBLOCK == nError) return 0; //非阻塞recv返回，无数据可接收
         return seError;
 #else
-        if (EAGAIN == errno)
-            return 0; //非阻塞recv返回，无数据可接收
+        if (EAGAIN == errno || EWOULDBLOCK == errno || EINTR == errno)
+                return 0; //非阻塞recv返回，无数据可接收
+
+        // printf("result = %d, errno = %d socket = %d\n", nResult, errno, m_hSocket);
         return seError;
 #endif
     }

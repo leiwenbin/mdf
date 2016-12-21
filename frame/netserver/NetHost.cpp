@@ -99,6 +99,11 @@ namespace mdf {
         return m_pConnect->GetIdleState();
     }
 
+    //获取连接是否是正常断开的
+    bool NetHost::GetNormalDisconnect() {
+        return m_pConnect->GetNormalDisconnect();
+    }
+
     //获取发送缓冲区的数据长度
     uint32 NetHost::GetSendBufferDataLength() {
         return m_pConnect->GetSendBuffUsedLength();
