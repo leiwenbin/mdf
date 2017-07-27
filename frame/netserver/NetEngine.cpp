@@ -31,6 +31,7 @@ namespace mdf {
         m_startError = "";
         m_nHeartTime = 0; //心跳间隔(S),默认不检查
         m_nIdleTime = 0; //空闲连接时间(S),默认不检查
+        m_nBehaviorTime = 0; //发生业务行为的限制时间(S),默认不检查
         m_pNetMonitor = NULL;
         m_ioThreadCount = 16; //网络io线程数量
         m_workThreadCount = 16; //工作线程数量
@@ -68,9 +69,14 @@ namespace mdf {
         m_nHeartTime = nSecond;
     }
 
-    //设置防空连接时间,只有设置了心跳时间才有效
+    //设置防空连接时间
     void NetEngine::SetIdleTime(int nSecond) {
         m_nIdleTime = nSecond;
+    }
+
+    //设置发生业务行为的限制时间
+    void NetEngine::SetBehaviorTime(int nSecond) {
+        m_nBehaviorTime = nSecond;
     }
 
     //设置网络IO线程数量
@@ -187,17 +193,21 @@ namespace mdf {
             if (!pConnect->IsServer()) {
                 //非SERVER连接,检查心跳
                 tLastHeart = pConnect->GetLastHeart();
-                if (tCurTime >= tLastHeart && tCurTime - tLastHeart >= m_nHeartTime) //无心跳
+                if (tCurTime >= tLastHeart && tCurTime - tLastHeart >= m_nHeartTime) {
+                    //无心跳
                     bClose = true;
-
-                //检查空连接
-                if (m_nIdleTime > 0 && tCurTime >= tLastHeart && pConnect->IsUnused() && tCurTime - tLastHeart >= m_nIdleTime) {
+                } else if (m_nIdleTime > 0 && pConnect->IsUnused() && (tCurTime - pConnect->GetCreateTime()) >= m_nIdleTime) {
+                    //检查空连接
                     pConnect->SetIdleState();
+                    bClose = true;
+                } else if (m_nBehaviorTime > 0 && !pConnect->IsBehavior() && (tCurTime - pConnect->GetCreateTime()) >= m_nBehaviorTime) {
+                    //检查没有业务行为的连接
+                    pConnect->SetNoBehaviorState();
                     bClose = true;
                 }
             }
 
-            //无心跳/连接已断开/空连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
+            //无心跳/连接已断开/空连接/无业务行为的连接，强制断开连接，之后不可能有MsgWorker()发生，因为OnData里面已经找不到连接了
             if (bClose) {
                 itTmp = ++it;
                 CloseConnect(pConnect);
@@ -577,9 +587,10 @@ namespace mdf {
         if (!addrToI64(addr64, ip, port)) return false;
 
         AutoLock lock(&m_serListMutex);
-        vector<SVR_CONNECT*> sockArray;
-        map<uint64, vector<SVR_CONNECT*> >::iterator it = m_keepIPList.find(addr64);
-        if (it == m_keepIPList.end()) m_keepIPList.insert(map<uint64, vector<SVR_CONNECT*> >::value_type(addr64, sockArray));
+        vector < SVR_CONNECT * > sockArray;
+        map<uint64, vector < SVR_CONNECT * > > ::iterator
+        it = m_keepIPList.find(addr64);
+        if (it == m_keepIPList.end()) m_keepIPList.insert(map<uint64, vector < SVR_CONNECT * > > ::value_type(addr64, sockArray));
         SVR_CONNECT* pSvr = new SVR_CONNECT;
         pSvr->reConnectSecond = reConnectTime;
         pSvr->lastConnect = 0;
@@ -626,7 +637,8 @@ namespace mdf {
 
         //重链尝试
         SVR_CONNECT* pSvr = NULL;
-        map<uint64, vector<SVR_CONNECT*> >::iterator it = m_keepIPList.begin();
+        map<uint64, vector < SVR_CONNECT * > > ::iterator
+        it = m_keepIPList.begin();
         vector<SVR_CONNECT*>::iterator itSvr;
         for (; it != m_keepIPList.end(); it++) {
             i64ToAddr(ip, port, it->first);
@@ -675,7 +687,8 @@ namespace mdf {
         if (!pConnect->IsServer()) return;
         int sock = pConnect->GetSocket()->GetSocket();
         AutoLock lock(&m_serListMutex);
-        map<uint64, vector<SVR_CONNECT*> >::iterator it = m_keepIPList.begin();
+        map<uint64, vector < SVR_CONNECT * > > ::iterator
+        it = m_keepIPList.begin();
         int i = 0;
         int count = 0;
         SVR_CONNECT* pSvr = NULL;
@@ -697,7 +710,7 @@ namespace mdf {
         //关闭无心跳的连接
         ConnectList::iterator it;
         NetConnect* pConnect;
-        vector<NetConnect*> recverList;
+        vector < NetConnect * > recverList;
         //加锁将所有广播接收连接复制到一个队列中
         AutoLock lock(&m_connectsMutex);
         for (it = m_connectList.begin(); it != m_connectList.end(); it++) {
@@ -780,7 +793,8 @@ namespace mdf {
             isEnd = true;
             {
                 AutoLock lock(&m_serListMutex);
-                map<uint64, vector<SVR_CONNECT*> >::iterator it = m_keepIPList.begin();
+                map<uint64, vector < SVR_CONNECT * > > ::iterator
+                it = m_keepIPList.begin();
                 for (; it != m_keepIPList.end() && clientCount < 20000; it++) {
                     for (i = 0; i < it->second.size() && clientCount < 20000; i++) {
                         pSvr = it->second[i];

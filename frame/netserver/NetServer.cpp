@@ -89,6 +89,11 @@ namespace mdf {
         m_pNetCard->SetIdleTime(nSecond);
     }
 
+    //设置发生业务行为的限制时间
+    void NetServer::SetBehaviorTime(int nSecond) {
+        m_pNetCard->SetBehaviorTime(nSecond);
+    }
+
     //设置网络IO线程数量
     void NetServer::SetIOThreadCount(int nCount) {
         m_pNetCard->SetIOThreadCount(nCount);

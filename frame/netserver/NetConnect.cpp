@@ -30,6 +30,7 @@ namespace mdf {
         m_bIsServer = bIsServer;
         m_tCreateTime = m_tLastHeart = time(NULL);
         m_bUnused = true;
+        m_bBehavior = false;
 #ifdef WIN32
         Socket::InitForIOCP(sock, listenSock);
 #endif
@@ -38,6 +39,7 @@ namespace mdf {
         m_pHostData = NULL;
         m_autoFreeData = true;
         m_bIdleState = false;
+        m_bNoBehaviorState = false;
         m_bNormalDisconnect = false;
         m_pSvrInfo = NULL;
     }
@@ -92,6 +94,15 @@ namespace mdf {
     void NetConnect::SetUsed() {
         if (m_bUnused)
             m_bUnused = false;
+    }
+
+    bool NetConnect::IsBehavior() {
+        return m_bBehavior;
+    }
+
+    void NetConnect::SetBehavior() {
+        if (!m_bBehavior)
+            m_bBehavior = true;
     }
 
     unsigned char* NetConnect::PrepareBuffer(unsigned short uRecvSize) {
@@ -297,6 +308,14 @@ namespace mdf {
 
     bool NetConnect::GetIdleState() {
         return m_bIdleState;
+    }
+
+    void NetConnect::SetNoBehaviorState() {
+        m_bNoBehaviorState = true;
+    }
+
+    bool NetConnect::GetNoBehaviorState() {
+        return m_bNoBehaviorState;
     }
 
     void NetConnect::SetNormalDisconnect() {

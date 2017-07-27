@@ -99,6 +99,16 @@ namespace mdf {
         return m_pConnect->GetIdleState();
     }
 
+    //获取连接业务行为状态
+    bool NetHost::GetNoBehaviorState() {
+        return m_pConnect->GetNoBehaviorState();
+    }
+
+    //设置连接业务行为
+    void NetHost::SetBehavior() {
+        m_pConnect->SetBehavior();
+    }
+
     //获取连接是否是正常断开的
     bool NetHost::GetNormalDisconnect() {
         return m_pConnect->GetNormalDisconnect();
