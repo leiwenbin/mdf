@@ -173,7 +173,7 @@ namespace mdf {
         return;
     }
 
-    int ThreadPool::GetTaskCount() {
+    unsigned int ThreadPool::GetTaskCount() {
         return m_tasks.size();
     }
 

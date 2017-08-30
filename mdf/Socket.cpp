@@ -435,25 +435,6 @@ namespace mdf {
             return true;
         }
         return 0 == nSelectRet;
-
-    }
-
-//功能：等待数据
-    bool Socket::WaitData() {
-        int nSelectRet;
-#ifdef WIN32
-        FD_SET readfds = {1, (SOCKET)m_hSocket};
-        nSelectRet = ::select(0, &readfds, NULL, NULL, NULL); //检查可读状态
-#else
-        fd_set readfds;
-        FD_ZERO(&readfds);
-        FD_SET(m_hSocket, &readfds);
-        nSelectRet = ::select(m_hSocket + 1, &readfds, NULL, NULL, NULL); //检查可读状态
-#endif
-        if (SOCKET_ERROR == nSelectRet) {
-            return false;
-        }
-        return 0 != nSelectRet;
     }
 
 /*

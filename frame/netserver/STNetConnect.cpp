@@ -8,7 +8,6 @@
 #include "../../../include/mdf/atom.h"
 
 using namespace std;
-unsigned int g_r = 0;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -38,6 +37,8 @@ namespace mdf {
         m_socket.InitPeerAddress();
         m_socket.InitLocalAddress();
         m_pSvrInfo = NULL;
+        m_monitorSend = false;//监听发送
+        m_monitorRecv = false;//监听接收
     }
 
     STNetConnect::~STNetConnect() {
@@ -53,7 +54,6 @@ namespace mdf {
             }
             this->~STNetConnect();
             m_pMemoryPool->Free(this);
-            AtomAdd(&g_r, 1);
         }
     }
 
@@ -119,9 +119,7 @@ namespace mdf {
 #ifdef WIN32
         m_pNetMonitor->AddSend( m_socket.GetSocket(), NULL, 0 );
 #else
-        //在STNetEngine::MsgWorker()中执行，一定是在RecvData()之后，所以绝对不会被
-        //m_pNetMonitor->AddIO( m_socket.GetSocket(), true, false );覆盖，不会遗漏发送请求
-        ((STEpoll*) m_pNetMonitor)->AddIO(m_socket.GetSocket(), true, true);
+        AddEpollSend();//监听发送
 #endif
         return true;
     }
@@ -142,6 +140,7 @@ namespace mdf {
 //结束发送流程
     void STNetConnect::SendEnd() {
         m_nSendCount = 0;
+        m_monitorSend = false;//不监听发送
     }
 
     void STNetConnect::Close() {
@@ -194,6 +193,16 @@ namespace mdf {
 
     void* STNetConnect::GetSvrInfo() {
         return m_pSvrInfo;
+    }
+
+    bool STNetConnect::AddEpollSend() {
+        m_monitorSend = true; // 监听发送
+        return ((STEpoll*) m_pNetMonitor)->AddIO(m_socket.GetSocket(), m_monitorRecv, m_monitorSend);
+    }
+
+    bool STNetConnect::AddEpollRecv() {
+        m_monitorRecv = true; // 监听接收
+        return ((STEpoll*) m_pNetMonitor)->AddIO(m_socket.GetSocket(), m_monitorRecv, m_monitorSend);
     }
 
 }

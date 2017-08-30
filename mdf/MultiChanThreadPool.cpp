@@ -188,7 +188,7 @@ namespace mdf {
         return;
     }
 
-    int MultiChanThreadPool::GetTaskCount(unsigned short usIndex) {
+    unsigned int MultiChanThreadPool::GetTaskCount(unsigned short usIndex) {
         if (usIndex > (m_tasks.size() - 1)) return 0;
         return m_tasks.at(usIndex).size();
     }

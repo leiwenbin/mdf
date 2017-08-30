@@ -350,7 +350,7 @@ namespace mdf {
                 (char*)(pConnect->PrepareBuffer(BUFBLOCK_SIZE)),
                 BUFBLOCK_SIZE );
 #else
-        bMonitor = m_pNetMonitor->AddIO(sock, true, false);
+        bMonitor = pConnect->AddEpollRecv();
 #endif
         if (!bMonitor) CloseConnect(pConnect->GetSocket()->GetSocket());
         return true;
@@ -411,7 +411,7 @@ namespace mdf {
             nRecvLen = pConnect->GetSocket()->Receive(pWriteBuf, BUFBLOCK_SIZE);
             if (nRecvLen < 0) return unconnect;
             if (0 == nRecvLen) {
-                if (!m_pNetMonitor->AddIO(pConnect->GetSocket()->GetSocket(), true, false)) return unconnect;
+                if (!pConnect->AddEpollRecv()) return unconnect;
                 return wait_recv;
             }
             nMaxRecvSize += nRecvLen;
@@ -443,7 +443,9 @@ namespace mdf {
     connectState STNetEngine::SendData(STNetConnect* pConnect, unsigned short uSize) {
 #ifdef WIN32
         unsigned char buf[BUFBLOCK_SIZE];
-        if ( uSize > 0 ) pConnect->m_sendBuffer.ReadData(buf, uSize);
+        if ( uSize > 0 )
+            pConnect->m_sendBuffer.ReadData(buf, uSize);
+
         int nLength = pConnect->m_sendBuffer.GetLength();
         if ( 0 >= nLength )
         {
@@ -527,6 +529,9 @@ namespace mdf {
          结论：不会出现并发发送，也不会漏数据
          */
         if (!pConnect->SendStart()) return cs; //已经在发送
+        //发送流程开始
+        pConnect->AddEpollSend();
+
         return cs;
 #endif
         return ok;
@@ -862,7 +867,6 @@ namespace mdf {
             if (curtime - start < 20) return true;
             start = -1;
         }
-        if (-1 == count) printf("epoll_wait return %d\n", count);
         volatile int errCode = errno; //epoll_wait失败时状态
 
         /*
@@ -955,12 +959,10 @@ namespace mdf {
             int errCode = GetLastError();
             if ( SOCKET_ERROR == nSelectRet ) //出错时错误码和打印所有句柄状态
             {
-                printf( "select return %d\n", nSelectRet );
                 for ( i = startPos; i < endPos; i++ )
                 {
                     pSvr = clientList[i];
                     svrSock = pSvr->sock;
-                    printf( "select = %d errno(%d) sock(%d) read(%d) send(%d)\n", nSelectRet, errCode, svrSock, FD_ISSET(svrSock, &readfds), FD_ISSET(svrSock, &sendfds) );
                 }
             }
 

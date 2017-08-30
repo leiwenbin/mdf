@@ -138,6 +138,7 @@ namespace mdf {
         AtomAdd(&pMemory->pPool->freeCount, -1);
         pMemory->isAlloced = 1;
 
+        memset(pMemory->buffer, 0, m_objectSize);
         return pMemory->buffer;
     }
 

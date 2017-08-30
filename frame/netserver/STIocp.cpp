@@ -179,6 +179,8 @@ namespace mdf {
                 pOverlapped = NULL;
                 return false;
             }
+        } else {
+            return false;
         }
 
         return true;
