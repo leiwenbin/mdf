@@ -174,6 +174,7 @@ namespace mdf {
     }
 
     unsigned int ThreadPool::GetTaskCount() {
+        AutoLock lock(&m_tasksMutex);
         return m_tasks.size();
     }
 

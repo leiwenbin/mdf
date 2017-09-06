@@ -18,7 +18,7 @@
 #include   <unistd.h>                     //chdir()
 #include   <sys/stat.h>                 //mkdir()
 #include   <sys/types.h>               //mkdir()
-#include   <dirent.h>					//closedir()
+#include   <dirent.h>                    //closedir()
 
 #endif
 
@@ -263,7 +263,7 @@ namespace mdf {
         char strTime[64] = {0};
         char strLogTime[64] = {0};
         strftime(strTime, 64, "%Y-%m-%d %H:%M:%S", pCurTM);
-        sprintf(strLogTime, "%s.%lu", strTime, (MillTime() - cutTime * 1000));
+        sprintf(strLogTime, "%s.%03lu", strTime, (MillTime() - cutTime * 1000));
         //取得日志等级
         std::string strLevel;
         switch (level) {
@@ -330,7 +330,7 @@ namespace mdf {
         char strTime[64] = {0};
         char strLogTime[64] = {0};
         strftime(strTime, 64, "%Y-%m-%d %H:%M:%S", pCurTM);
-        sprintf(strLogTime, "%s.%lu", strTime, (MillTime() - cutTime * 1000));
+        sprintf(strLogTime, "%s.%03lu", strTime, (MillTime() - cutTime * 1000));
         //取得日志等级
         std::string strLevel;
         switch (level) {

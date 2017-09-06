@@ -87,7 +87,7 @@ namespace mdf {
         multiChanThreadMaps::iterator it = m_threads.begin();
         int i = 0;
         //全部设为停止
-        for (i = 0,it = m_threads.begin(); it != m_threads.end(); it++,++i) {
+        for (i = 0, it = m_threads.begin(); it != m_threads.end(); it++, ++i) {
             it->second->bRun = false;
             m_sigNewTask.at(i).Notify();
         }
@@ -189,7 +189,8 @@ namespace mdf {
     }
 
     unsigned int MultiChanThreadPool::GetTaskCount(unsigned short usIndex) {
-        if (usIndex > (m_tasks.size() - 1)) return 0;
+        AutoLock lock(&m_tasksMutex);
+        if (usIndex >= m_tasks.size()) return 0;
         return m_tasks.at(usIndex).size();
     }
 
