@@ -100,7 +100,7 @@ namespace mdf {
         m_nThreadNum = 0;
     }
 
-    void MultiChanThreadPool::Accept(std::string& strIndex, MethodPointer method, void* pObj, void* pParam) {
+    void MultiChanThreadPool::Accept(const std::string& strIndex, MethodPointer method, void* pObj, void* pParam) {
         Task* pTask = CreateTask();
         pTask->Accept(method, pObj, pParam);
         unsigned int uiIndex = mdf::APHash(strIndex.c_str());

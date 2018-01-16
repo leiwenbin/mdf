@@ -145,7 +145,12 @@ namespace mdf {
     void FastMemoryPool::Free(void* pObject) {
         if (NULL == pObject) return;
         MEMORY* pMemory = (MEMORY*) ((char*) pObject - sizeof(MEMORY));
-        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize)) mdf_assert(false);//捕获用户对不属于内存池的内存调用Free
+        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize))
+        {
+            printf("memory address:%p, buffer address:%p, pObject address:%p.\n",pMemory, (void*)pMemory->pPool->buffer,pObject);
+            mdf_assert(false);//捕获用户对不属于内存池的内存调用Free
+        }
+
         mdf_assert(NULL == pMemory->next);
         if (1 != AtomAdd(&pMemory->isAlloced, -1)) mdf_assert(false); //捕获用户未配对的Alloc()/Free()调用
         AtomAdd(&pMemory->pPool->freeCount, 1);
