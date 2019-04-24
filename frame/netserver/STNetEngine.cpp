@@ -1,4 +1,4 @@
-﻿#include "../../../include/frame/netserver/STIocp.h"
+#include "../../../include/frame/netserver/STIocp.h"
 #include "../../../include/frame/netserver/STEpoll.h"
 
 #ifdef WIN32

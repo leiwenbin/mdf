@@ -1,4 +1,4 @@
-﻿// EpollFrame.cpp: implementation of the EpollFrame class.
+// EpollFrame.cpp: implementation of the EpollFrame class.
 //
 //////////////////////////////////////////////////////////////////////
 

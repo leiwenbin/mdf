@@ -1,4 +1,4 @@
-﻿#include "../../../include/frame/netserver/NetHost.h"
+#include "../../../include/frame/netserver/NetHost.h"
 #include "../../../include/frame/netserver/NetConnect.h"
 #include "../../../include/frame/netserver/HostData.h"
 #include "../../../include/mdf/atom.h"

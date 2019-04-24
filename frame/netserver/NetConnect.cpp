@@ -1,4 +1,4 @@
-﻿// NetConnect.cpp: implementation of the NetConnect class.
+// NetConnect.cpp: implementation of the NetConnect class.
 //
 //////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,4 @@
-﻿#include "../../../include/mdf/mapi.h"
+#include "../../../include/mdf/mapi.h"
 #include "../../../include/frame/netserver/NetServer.h"
 #include "../../../include/frame/netserver/NetEngine.h"
 #include "../../../include/frame/netserver/IOCPFrame.h"

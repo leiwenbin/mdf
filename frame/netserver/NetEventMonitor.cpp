@@ -1,4 +1,4 @@
-﻿// NetEventMonitor.cpp: implementation of the NetEventMonitor class.
+// NetEventMonitor.cpp: implementation of the NetEventMonitor class.
 //
 //////////////////////////////////////////////////////////////////////
 

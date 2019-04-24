@@ -1,4 +1,4 @@
-﻿// EpollMonitor.cpp: implementation of the EpollMonitor class.
+// EpollMonitor.cpp: implementation of the EpollMonitor class.
 //
 //////////////////////////////////////////////////////////////////////
 
