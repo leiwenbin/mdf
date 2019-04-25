@@ -1,4 +1,4 @@
-﻿// IOBuffer.cpp: implementation of the IOBuffer class.
+// IOBuffer.cpp: implementation of the IOBuffer class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -118,7 +118,7 @@ namespace mdf {
                 //读操作要么在m_pRecvBufferBlock之前的内存上进行
                 //要么在m_pRecvBufferBlock当前指向的内存块前端，已经写入完成的byte上进行
                 //结论，并发读写永远不会发生冲突，无锁
-                MDF_SAFE_DELETE(pRecvBlock); //释放缓冲块
+                MDF_SAFE_DELETE(pRecvBlock) //释放缓冲块
                 m_recvBufferList.erase(it);
                 it = m_recvBufferList.begin(); //准备从下一个缓冲块中读取
             } else
@@ -134,7 +134,7 @@ namespace mdf {
         vector<IOBufferBlock*>::iterator it = m_recvBufferList.begin();
         for (; it != m_recvBufferList.end(); it++) {
             pRecvBlock = *it;
-            MDF_SAFE_DELETE(pRecvBlock);
+            MDF_SAFE_DELETE(pRecvBlock)
         }
         m_recvBufferList.clear();
         m_pRecvBufferBlock = NULL;

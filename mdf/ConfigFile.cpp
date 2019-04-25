@@ -1,4 +1,4 @@
-﻿// ConfigFile.cpp: implementation of the ConfigFile class.
+// ConfigFile.cpp: implementation of the ConfigFile class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@ namespace mdf {
 
     ConfigFile::~ConfigFile() {
         Save();
-        MDF_SAFE_DELETE_ARRAY(m_exeDir);
+        MDF_SAFE_DELETE_ARRAY(m_exeDir)
     }
 
     bool ConfigFile::ReadConfig(const char* fileName, bool force) {

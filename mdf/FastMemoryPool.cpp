@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/FastMemoryPool.h"
+#include "../../include/mdf/FastMemoryPool.h"
 #include "../../include/mdf/mapi.h"
 #include "../../include/mdf/atom.h"
 
@@ -36,12 +36,12 @@ namespace mdf {
         while (NULL != m_poolHeader) {
             pPool = m_poolHeader;
             m_poolHeader = m_poolHeader->next;
-            MDF_SAFE_DELETE_ARRAY(pPool->buffer);
-            MDF_SAFE_DELETE(pPool);
+            MDF_SAFE_DELETE_ARRAY(pPool->buffer)
+            MDF_SAFE_DELETE(pPool)
         }
 
         for (int i = 0; i < m_threadCount; i++) {
-            MDF_SAFE_DELETE(m_poolForThread[i]);
+            MDF_SAFE_DELETE(m_poolForThread[i])
         }
     }
 
@@ -145,9 +145,8 @@ namespace mdf {
     void FastMemoryPool::Free(void* pObject) {
         if (NULL == pObject) return;
         MEMORY* pMemory = (MEMORY*) ((char*) pObject - sizeof(MEMORY));
-        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize))
-        {
-            printf("memory address:%p, buffer address:%p, pObject address:%p.\n",pMemory, (void*)pMemory->pPool->buffer,pObject);
+        if (0 != ((char*) pMemory - (char*) pMemory->pPool->buffer) % (sizeof(MEMORY) + pMemory->pThis->m_objectSize)) {
+            printf("memory address:%p, buffer address:%p, pObject address:%p.\n", pMemory, (void*) pMemory->pPool->buffer, pObject);
             mdf_assert(false);//捕获用户对不属于内存池的内存调用Free
         }
 

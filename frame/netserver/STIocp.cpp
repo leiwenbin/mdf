@@ -1,4 +1,4 @@
-﻿// STIocp.cpp: implementation of the STIocp class.
+// STIocp.cpp: implementation of the STIocp class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -29,9 +29,9 @@ namespace mdf {
         DWORD dwTrans;
         DWORD dwFlags;
         if(FALSE == WSAGetOverlappedResult(sock, pWSAOVERLAPPED, &dwTrans, FALSE, &dwFlags))
-        return WSAGetLastError();
+            return WSAGetLastError();
         else
-        return ERROR_SUCCESS;
+            return ERROR_SUCCESS;
 #endif
         return 0;
     }

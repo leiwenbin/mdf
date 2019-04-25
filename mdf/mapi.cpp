@@ -1,4 +1,4 @@
-﻿// mapi.cpp: implementation of the mapi class.
+// mapi.cpp: implementation of the mapi class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 #else
 
 #include <unistd.h>
-#include <sys/stat.h> 
+#include <sys/stat.h>
 
 #endif
 
@@ -181,6 +181,7 @@ namespace mdf {
 
 #include <linux/unistd.h>
 #include <sys/syscall.h>
+
 /*
  syscall(__NR_gettid)或者syscall(SYS_gettid)
  SYS_gettid与__NR_gettid是相等的常量

@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/ThreadPool.h"
+#include "../../include/mdf/ThreadPool.h"
 #include "../../include/mdf/MemoryPool.h"
 
 using namespace std;

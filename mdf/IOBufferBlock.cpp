@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/IOBufferBlock.h"
+#include "../../include/mdf/IOBufferBlock.h"
 #include "../../include/mdf/MemoryPool.h"
 #include "../../include/mdf/Lock.h"
 

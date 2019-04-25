@@ -1,4 +1,4 @@
-﻿// Thread.cpp: implementation of the Thread class.
+// Thread.cpp: implementation of the Thread class.
 //
 //////////////////////////////////////////////////////////////////////
 #include "../../include/mdf/Thread.h"

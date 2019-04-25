@@ -14,8 +14,8 @@ namespace mdf {
     NetHost::NetHost(const NetHost& obj) :
             m_pConnect(NULL) {
         *this = obj;
-    //	AtomAdd(&obj.m_pConnect->m_useCount, 1);
-    //	m_pConnect = obj.m_pConnect;
+        //	AtomAdd(&obj.m_pConnect->m_useCount, 1);
+        //	m_pConnect = obj.m_pConnect;
     }
 
     NetHost& NetHost::operator=(const NetHost& obj) {

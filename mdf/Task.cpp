@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/Task.h"
+#include "../../include/mdf/Task.h"
 
 namespace mdf {
     Task::Task() {

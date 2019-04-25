@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/ShareObject.h"
+#include "../../include/mdf/ShareObject.h"
 #include "../../include/mdf/atom.h"
 #include <cstdio>
 

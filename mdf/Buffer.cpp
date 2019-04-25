@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/Buffer.h"
+#include "../../include/mdf/Buffer.h"
 #include <cstdio>
 #include <cstring>
 

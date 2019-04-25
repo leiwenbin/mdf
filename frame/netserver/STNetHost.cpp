@@ -1,4 +1,4 @@
-﻿#include "../../../include/frame/netserver/STNetHost.h"
+#include "../../../include/frame/netserver/STNetHost.h"
 #include "../../../include/frame/netserver/STNetConnect.h"
 #include "../../../include/mdf/atom.h"
 

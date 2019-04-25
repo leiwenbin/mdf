@@ -1,4 +1,4 @@
-﻿// ShareMemory.cpp: implementation of the ShareMemory class.
+// ShareMemory.cpp: implementation of the ShareMemory class.
 //
 //////////////////////////////////////////////////////////////////////
 

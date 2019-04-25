@@ -1,4 +1,4 @@
-﻿// Queue.cpp: implementation of the Queue class.
+// Queue.cpp: implementation of the Queue class.
 //
 //////////////////////////////////////////////////////////////////////
 

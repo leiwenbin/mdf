@@ -1,4 +1,4 @@
-﻿// Signal.cpp: implementation of the Signal class.
+// Signal.cpp: implementation of the Signal class.
 //
 //////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,4 @@
-﻿// IOCPMonitor.cpp: implementation of the IOCPMonitor class.
+// IOCPMonitor.cpp: implementation of the IOCPMonitor class.
 //
 //////////////////////////////////////////////////////////////////////
 

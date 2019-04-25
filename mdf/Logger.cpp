@@ -1,4 +1,4 @@
-﻿// Logger.cpp: implementation of the Logger class.
+// Logger.cpp: implementation of the Logger class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ namespace mdf {
             fclose(m_fpRunLog);
             m_fpRunLog = NULL;
         }
-        MDF_SAFE_DELETE_ARRAY(m_exeDir);
+        MDF_SAFE_DELETE_ARRAY(m_exeDir)
     }
 
     void Logger::SetLogName(const char* name) {

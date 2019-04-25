@@ -32,7 +32,7 @@ namespace mdf {
         if (NULL != m_pNetMonitor) {
             m_pNetMonitor->Stop();
             m_sleep(2000);
-            MDF_SAFE_DELETE(m_pNetMonitor);
+            MDF_SAFE_DELETE(m_pNetMonitor)
         }
 #endif
     }
@@ -65,7 +65,7 @@ namespace mdf {
 
             for (i = 0; i < nCount; i++) {
                 if (((EpollMonitor*) m_pNetMonitor)->IsStop(events[i].data.u64)) {
-                    MDF_SAFE_DELETE_ARRAY(events);
+                    MDF_SAFE_DELETE_ARRAY(events)
                     return;
                 }
 
@@ -88,7 +88,7 @@ namespace mdf {
                 }
             }
         }
-        MDF_SAFE_DELETE_ARRAY(events);
+        MDF_SAFE_DELETE_ARRAY(events)
 #endif
     }
 
@@ -114,7 +114,7 @@ namespace mdf {
             //加入到ioList中
             for (i = 0; i < nCount; i++) {
                 if (((EpollMonitor*) m_pNetMonitor)->IsStop(events[i].data.u64)) {
-                    MDF_SAFE_DELETE_ARRAY(events);
+                    MDF_SAFE_DELETE_ARRAY(events)
                     return;
                 }
 
@@ -169,7 +169,7 @@ namespace mdf {
             //加入到ioList中
             for (i = 0; i < nCount; i++) {
                 if (((EpollMonitor*) m_pNetMonitor)->IsStop(events[i].data.u64)) {
-                    MDF_SAFE_DELETE_ARRAY(events);
+                    MDF_SAFE_DELETE_ARRAY(events)
                     return;
                 }
 

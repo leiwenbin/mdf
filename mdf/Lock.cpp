@@ -1,4 +1,4 @@
-﻿// Lock.cpp: implementation of the Thread class.
+// Lock.cpp: implementation of the Thread class.
 //
 //////////////////////////////////////////////////////////////////////
 #include "../../include/mdf/Lock.h"

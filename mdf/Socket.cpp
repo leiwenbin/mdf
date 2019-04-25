@@ -1,4 +1,4 @@
-﻿// Socket.cpp: implementation of the Socket class.
+// Socket.cpp: implementation of the Socket class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -298,7 +298,7 @@ namespace mdf {
         return seError;
 #else
         if (EAGAIN == errno || EWOULDBLOCK == errno || EINTR == errno)
-                return 0; //非阻塞recv返回，无数据可接收
+            return 0; //非阻塞recv返回，无数据可接收
 
         // printf("result = %d, errno = %d socket = %d\n", nResult, errno, m_hSocket);
         return seError;

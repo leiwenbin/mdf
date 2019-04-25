@@ -1,4 +1,4 @@
-﻿// Executor.cpp: implementation of the Executor class.
+// Executor.cpp: implementation of the Executor class.
 //
 //////////////////////////////////////////////////////////////////////
 

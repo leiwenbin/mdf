@@ -1,4 +1,4 @@
-﻿// IOCPFrame.cpp: implementation of the IOCPFrame class.
+// IOCPFrame.cpp: implementation of the IOCPFrame class.
 //
 //////////////////////////////////////////////////////////////////////
 

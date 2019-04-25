@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/FinishedTime.h"
+#include "../../include/mdf/FinishedTime.h"
 #include "../../include/mdf/mapi.h"
 
 namespace mdf {

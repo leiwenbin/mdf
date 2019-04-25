@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/atom.h"
+#include "../../include/mdf/atom.h"
 
 #ifdef WIN32
 #include <windows.h>

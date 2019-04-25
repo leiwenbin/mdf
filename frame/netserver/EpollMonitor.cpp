@@ -32,7 +32,7 @@ namespace mdf {
 #endif
     }
 
-    void EpollMonitor::SheildSigPipe() {
+    void EpollMonitor::ShieldSigPipe() {
 #ifndef WIN32
         struct sigaction sa;
         sa.sa_handler = SIG_IGN;
@@ -42,7 +42,7 @@ namespace mdf {
 
     bool EpollMonitor::Start(int nMaxMonitor) {
 #ifndef WIN32
-        SheildSigPipe();
+        ShieldSigPipe();
         m_nMaxMonitor = nMaxMonitor;
         m_epollExit = socket(PF_INET, SOCK_STREAM, 0);
         /* 创建 epoll 句柄*/

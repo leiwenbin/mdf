@@ -17,7 +17,7 @@ namespace mdf {
     }
 
     NetServer::~NetServer() {
-        MDF_SAFE_DELETE(m_pNetCard);
+        MDF_SAFE_DELETE(m_pNetCard)
     }
 
     void* NetServer::TMain(void* pParam) {

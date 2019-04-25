@@ -1,4 +1,4 @@
-﻿#include "../../../include/frame/netserver/HostData.h"
+#include "../../../include/frame/netserver/HostData.h"
 #include "../../../include/mdf/atom.h"
 #include "../../../include/mdf/mapi.h"
 

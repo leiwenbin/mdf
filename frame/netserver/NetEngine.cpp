@@ -49,7 +49,7 @@ namespace mdf {
     NetEngine::~NetEngine() {
         Stop();
         if (NULL != m_pConnectPool) {
-            MDF_SAFE_DELETE(m_pConnectPool);
+            MDF_SAFE_DELETE(m_pConnectPool)
         }
         Socket::SocketDestory();
     }
@@ -109,7 +109,7 @@ namespace mdf {
         if (memoryCount < 200) memoryCount = 200;
         if (NULL != m_pConnectPool) //之前Stop了又重新Start
         {
-            MDF_SAFE_DELETE(m_pConnectPool);
+            MDF_SAFE_DELETE(m_pConnectPool)
         }
         m_pConnectPool = new MemoryPool(sizeof(NetConnect), memoryCount);
         if (NULL == m_pConnectPool) {
@@ -587,10 +587,10 @@ namespace mdf {
         if (!addrToI64(addr64, ip, port)) return false;
 
         AutoLock lock(&m_serListMutex);
-        vector < SVR_CONNECT * > sockArray;
-        map<uint64, vector < SVR_CONNECT * > > ::iterator
-        it = m_keepIPList.find(addr64);
-        if (it == m_keepIPList.end()) m_keepIPList.insert(map<uint64, vector < SVR_CONNECT * > > ::value_type(addr64, sockArray));
+        vector<SVR_CONNECT*> sockArray;
+        map<uint64, vector<SVR_CONNECT*> >::iterator
+                it = m_keepIPList.find(addr64);
+        if (it == m_keepIPList.end()) m_keepIPList.insert(map<uint64, vector<SVR_CONNECT*> >::value_type(addr64, sockArray));
         SVR_CONNECT* pSvr = new SVR_CONNECT;
         pSvr->reConnectSecond = reConnectTime;
         pSvr->lastConnect = 0;
@@ -625,7 +625,7 @@ namespace mdf {
         sock.SetSockMode();
 // 	bool successed = sock.Connect(ip, port);
         svrSock = sock.Detach();
-        return AsycConnect(svrSock, ip, port);
+        return AsyncConnect(svrSock, ip, port);
     }
 
     bool NetEngine::ConnectAll() {
@@ -637,8 +637,8 @@ namespace mdf {
 
         //重链尝试
         SVR_CONNECT* pSvr = NULL;
-        map<uint64, vector < SVR_CONNECT * > > ::iterator
-        it = m_keepIPList.begin();
+        map<uint64, vector<SVR_CONNECT*> >::iterator
+                it = m_keepIPList.begin();
         vector<SVR_CONNECT*>::iterator itSvr;
         for (; it != m_keepIPList.end(); it++) {
             i64ToAddr(ip, port, it->first);
@@ -648,7 +648,7 @@ namespace mdf {
                 if (SVR_CONNECT::connectting == pSvr->state || SVR_CONNECT::connected == pSvr->state || SVR_CONNECT::unconnectting == pSvr->state) {
                     if (0 > pSvr->reConnectSecond && SVR_CONNECT::connected == pSvr->state) {
                         itSvr = it->second.erase(itSvr);
-                        MDF_SAFE_DELETE(pSvr);
+                        MDF_SAFE_DELETE(pSvr)
                         continue;
                     }
                     itSvr++;
@@ -656,7 +656,7 @@ namespace mdf {
                 }
                 if (0 > pSvr->reConnectSecond && 0 != pSvr->lastConnect) {
                     itSvr = it->second.erase(itSvr);
-                    MDF_SAFE_DELETE(pSvr);
+                    MDF_SAFE_DELETE(pSvr)
                     continue;
                 }
                 if (curTime - pSvr->lastConnect < pSvr->reConnectSecond) {
@@ -687,8 +687,8 @@ namespace mdf {
         if (!pConnect->IsServer()) return;
         int sock = pConnect->GetSocket()->GetSocket();
         AutoLock lock(&m_serListMutex);
-        map<uint64, vector < SVR_CONNECT * > > ::iterator
-        it = m_keepIPList.begin();
+        map<uint64, vector<SVR_CONNECT*> >::iterator
+                it = m_keepIPList.begin();
         int i = 0;
         int count = 0;
         SVR_CONNECT* pSvr = NULL;
@@ -710,7 +710,7 @@ namespace mdf {
         //关闭无心跳的连接
         ConnectList::iterator it;
         NetConnect* pConnect;
-        vector < NetConnect * > recverList;
+        vector<NetConnect*> recverList;
         //加锁将所有广播接收连接复制到一个队列中
         AutoLock lock(&m_connectsMutex);
         for (it = m_connectList.begin(); it != m_connectList.end(); it++) {
@@ -793,8 +793,8 @@ namespace mdf {
             isEnd = true;
             {
                 AutoLock lock(&m_serListMutex);
-                map<uint64, vector < SVR_CONNECT * > > ::iterator
-                it = m_keepIPList.begin();
+                map<uint64, vector<SVR_CONNECT*> >::iterator
+                        it = m_keepIPList.begin();
                 for (; it != m_keepIPList.end() && clientCount < 20000; it++) {
                     for (i = 0; i < it->second.size() && clientCount < 20000; i++) {
                         pSvr = it->second[i];
@@ -817,9 +817,9 @@ namespace mdf {
             if (finished && isEnd) m_wakeConnectThread.Wait();
         }
         uint64* p = (uint64*) clientList;
-        MDF_SAFE_DELETE_ARRAY(p);
+        MDF_SAFE_DELETE_ARRAY(p)
 #ifndef WIN32
-        MDF_SAFE_DELETE_ARRAY(m_events);
+        MDF_SAFE_DELETE_ARRAY(m_events)
 #endif
         return NULL;
     }
@@ -830,7 +830,7 @@ namespace mdf {
 
 #endif
 
-    NetEngine::ConnectResult NetEngine::AsycConnect(int svrSock, const char* lpszHostAddress, unsigned short nHostPort) {
+    NetEngine::ConnectResult NetEngine::AsyncConnect(int svrSock, const char* lpszHostAddress, unsigned short nHostPort) {
         if (NULL == lpszHostAddress) return NetEngine::invalidParam;
         //将域名转换为真实IP，如果lpszHostAddress本来就是ip，不影响转换结果
         char ip[64]; //真实IP

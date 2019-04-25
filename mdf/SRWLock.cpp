@@ -1,4 +1,4 @@
-﻿// SRWLock.cpp: implementation of the SRWLock class.
+// SRWLock.cpp: implementation of the SRWLock class.
 //
 //////////////////////////////////////////////////////////////////////
 

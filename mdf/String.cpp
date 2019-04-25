@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/String.h"
+#include "../../include/mdf/String.h"
 #include <cstdio>
 #include <string>
 

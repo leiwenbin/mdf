@@ -1,4 +1,4 @@
-﻿// STEpoll.cpp: implementation of the STEpoll class.
+// STEpoll.cpp: implementation of the STEpoll class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@ namespace mdf {
 #endif
     }
 
-    void STEpoll::SheildSigPipe() {
+    void STEpoll::ShieldSigPipe() {
 #ifndef WIN32
         struct sigaction sa;
         sa.sa_handler = SIG_IGN;
@@ -51,7 +51,7 @@ namespace mdf {
             m_initError = "no memory for epoll_event";
             return false;
         }
-        SheildSigPipe();
+        ShieldSigPipe();
         m_epollExit = socket(PF_INET, SOCK_STREAM, 0);
         /* 创建 epoll 句柄*/
         m_hEpoll = epoll_create(m_nMaxMonitor);

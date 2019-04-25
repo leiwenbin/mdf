@@ -1,4 +1,4 @@
-﻿// STNetConnect.cpp: implementation of the STNetConnect class.
+// STNetConnect.cpp: implementation of the STNetConnect class.
 //
 //////////////////////////////////////////////////////////////////////
 

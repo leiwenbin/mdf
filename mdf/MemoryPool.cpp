@@ -1,4 +1,4 @@
-﻿#include "../../include/mdf/mapi.h"
+#include "../../include/mdf/mapi.h"
 #include "../../include/mdf/MemoryPool.h"
 #include "../../include/mdf/atom.h"
 #include "../../include/mdf/Lock.h"
@@ -23,14 +23,14 @@ namespace mdf {
 
     MemoryPool::~MemoryPool() {
         if (NULL != m_pNext) {
-            MDF_SAFE_DELETE(m_pNext);
+            MDF_SAFE_DELETE(m_pNext)
         }
-        MDF_SAFE_DELETE_ARRAY(m_pMemery);
+        MDF_SAFE_DELETE_ARRAY(m_pMemery)
         m_uFreeCount = 0;
         if (NULL != m_resizeCtrl) {
             Mutex* pMutex = (Mutex*) m_resizeCtrl;
             m_resizeCtrl = NULL;
-            MDF_SAFE_DELETE(pMutex);
+            MDF_SAFE_DELETE(pMutex)
         }
     }
 

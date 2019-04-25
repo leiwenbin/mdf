@@ -1,4 +1,4 @@
-﻿// Timer.cpp: implementation of the Timer class.
+// Timer.cpp: implementation of the Timer class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -107,7 +107,7 @@ namespace mdf {
         pObj->Release();
         if (NULL != pData) {
             char* pDel = (char*) pData;
-            MDF_SAFE_DELETE_ARRAY(pDel);
+            MDF_SAFE_DELETE_ARRAY(pDel)
             pData = NULL;
         }
 

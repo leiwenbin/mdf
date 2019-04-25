@@ -648,7 +648,7 @@ namespace mdf {
                 if (SVR_CONNECT::connectting == pSvr->state || SVR_CONNECT::connected == pSvr->state || SVR_CONNECT::unconnectting == pSvr->state) {
                     if (0 > pSvr->reConnectSecond && SVR_CONNECT::connected == pSvr->state) {
                         itSvr = it->second.erase(itSvr);
-                        MDF_SAFE_DELETE(pSvr);
+                        MDF_SAFE_DELETE(pSvr)
                         continue;
                     }
                     itSvr++;
@@ -656,7 +656,7 @@ namespace mdf {
                 }
                 if (0 > pSvr->reConnectSecond && 0 != pSvr->lastConnect) {
                     itSvr = it->second.erase(itSvr);
-                    MDF_SAFE_DELETE(pSvr);
+                    MDF_SAFE_DELETE(pSvr)
                     continue;
                 }
                 if (curTime - pSvr->lastConnect < pSvr->reConnectSecond) {
