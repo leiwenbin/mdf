@@ -217,7 +217,6 @@ namespace mdf {
             m_socket.GetPeerAddress(ip, port);
         else
             m_socket.GetLocalAddress(ip, port);
-        return;
     }
 
     void NetConnect::GetAddress(string& ip, int& port) {
@@ -225,7 +224,6 @@ namespace mdf {
             m_socket.GetPeerAddress(ip, port);
         else
             m_socket.GetLocalAddress(ip, port);
-        return;
     }
 
     void NetConnect::SetData(HostData* pData, bool autoFree) {

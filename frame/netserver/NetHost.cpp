@@ -63,17 +63,14 @@ namespace mdf {
 
     void NetHost::GetServerAddress(string& ip, int& port) {
         m_pConnect->GetServerAddress(ip, port);
-        return;
     }
 
     void NetHost::GetAddress(string& ip, int& port) {
         m_pConnect->GetAddress(ip, port);
-        return;
     }
 
     void NetHost::SetData(HostData* pData, bool autoFree) {
         m_pConnect->SetData(pData, autoFree);
-        return;
     }
 
     HostData* NetHost::GetData() {
