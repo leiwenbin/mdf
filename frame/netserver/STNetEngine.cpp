@@ -444,13 +444,13 @@ namespace mdf {
 #ifdef WIN32
         unsigned char buf[BUFBLOCK_SIZE];
         if ( uSize > 0 )
-            pConnect->m_sendBuffer.ReadData(buf, uSize);
+            pConnect->GetSendBuffer().ReadData(buf, uSize);
 
-        int nLength = pConnect->m_sendBuffer.GetLength();
+        int nLength = pConnect->GetSendBuffer().GetLength();
         if ( 0 >= nLength )
         {
             pConnect->SendEnd(); //发送结束
-            nLength = pConnect->m_sendBuffer.GetLength();//第二次检查发送缓冲
+            nLength = pConnect->GetSendBuffer().GetLength();//第二次检查发送缓冲
             if ( 0 >= nLength )
             {
                 /*
@@ -472,12 +472,12 @@ namespace mdf {
 
         if ( nLength > BUFBLOCK_SIZE )
         {
-            pConnect->m_sendBuffer.ReadData(buf, BUFBLOCK_SIZE, false);
+            pConnect->GetSendBuffer().ReadData(buf, BUFBLOCK_SIZE, false);
             m_pNetMonitor->AddSend( pConnect->GetSocket()->GetSocket(), (char*)buf, BUFBLOCK_SIZE );
         }
         else
         {
-            pConnect->m_sendBuffer.ReadData(buf, nLength, false);
+            pConnect->GetSendBuffer().ReadData(buf, nLength, false);
             m_pNetMonitor->AddSend( pConnect->GetSocket()->GetSocket(), (char*)buf, nLength );
         }
         return ok;
@@ -489,19 +489,19 @@ namespace mdf {
         int nSize = 0;
         int nSendSize = 0;
         int nFinishedSize = 0;
-        nSendSize = pConnect->m_sendBuffer.GetLength();
+        nSendSize = pConnect->GetSendBuffer().GetLength();
         if (0 < nSendSize) {
             nSize = 0;
             //一次发送4096byte
             if (BUFBLOCK_SIZE < nSendSize) //1次发不完，设置为就绪状态
             {
-                pConnect->m_sendBuffer.ReadData(buf, BUFBLOCK_SIZE, false);
+                pConnect->GetSendBuffer().ReadData(buf, BUFBLOCK_SIZE, false);
                 nSize += BUFBLOCK_SIZE;
                 nSendSize -= BUFBLOCK_SIZE;
                 cs = ok;
             } else //1次可发完，设置为等待状态
             {
-                pConnect->m_sendBuffer.ReadData(buf, nSendSize, false);
+                pConnect->GetSendBuffer().ReadData(buf, nSendSize, false);
                 nSize += nSendSize;
                 nSendSize = 0;
                 cs = wait_send;
@@ -510,7 +510,7 @@ namespace mdf {
             if (Socket::seError == nFinishedSize)
                 cs = unconnect;
             else {
-                pConnect->m_sendBuffer.ReadData(buf, nFinishedSize); //将发送成功的数据从缓冲清除
+                pConnect->GetSendBuffer().ReadData(buf, nFinishedSize); //将发送成功的数据从缓冲清除
                 if (nFinishedSize < nSize) //sock已写满，设置为等待状态
                     cs = wait_send;
             }
@@ -522,7 +522,7 @@ namespace mdf {
         pConnect->SendEnd(); //发送结束
         //////////////////////////////////////////////////////////////////////////
         //检查是否需要开始新的发送流程
-        if (0 >= pConnect->m_sendBuffer.GetLength()) return cs;
+        if (0 >= pConnect->GetSendBuffer().GetLength()) return cs;
         /*
          外部发送线程已完成发送缓冲写入
          多线程并发SendStart()，只有一个成功

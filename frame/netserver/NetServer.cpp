@@ -4,7 +4,7 @@
 #include "../../../include/frame/netserver/IOCPFrame.h"
 #include "../../../include/frame/netserver/EpollFrame.h"
 
-namespace mdf   {
+namespace mdf {
 
     NetServer::NetServer() {
 #ifdef WIN32

@@ -205,4 +205,12 @@ namespace mdf {
         return ((STEpoll*) m_pNetMonitor)->AddIO(m_socket.GetSocket(), m_monitorRecv, m_monitorSend);
     }
 
+    IOBuffer STNetConnect::GetRecvBuffer() {
+        return m_recvBuffer;
+    }
+
+    IOBuffer STNetConnect::GetSendBuffer() {
+        return m_sendBuffer;
+    }
+
 }

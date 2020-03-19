@@ -4,9 +4,6 @@ PROJECT(BaseSocket)
 
 option(C++11_ENABLE "C++11_ENABLE" ON)
 
-SET(CMAKE_C_COMPILER "/usr/bin/gcc")
-SET(CMAKE_CXX_COMPILER "/usr/bin/c++")
-
 IF (C++11_ENABLE)
     IF (APPLE)
     ELSEIF (UNIX)

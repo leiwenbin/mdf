@@ -75,11 +75,11 @@ namespace mdf {
     connectState IOCPFrame::SendData(NetConnect* pConnect, unsigned short uSize) {
         unsigned char buf[BUFBLOCK_SIZE];
         if (uSize > 0)
-            pConnect->m_sendBuffer.ReadData(buf, uSize);
-        int nLength = pConnect->m_sendBuffer.GetLength();
+            pConnect->GetSendBuffer().ReadData(buf, uSize);
+        int nLength = pConnect->GetSendBuffer().GetLength();
         if (0 >= nLength) {
             pConnect->SendEnd();//发送结束
-            nLength = pConnect->m_sendBuffer.GetLength();//第二次检查发送缓冲
+            nLength = pConnect->GetSendBuffer().GetLength();//第二次检查发送缓冲
             if (0 >= nLength) {
                 /*
                  情况1：外部发送线程未完成发送缓冲写入
@@ -103,11 +103,11 @@ namespace mdf {
         iocpData.connectId = pConnect->GetID();
         iocpData.buf = (char*) buf;
         if (nLength > BUFBLOCK_SIZE) {
-            pConnect->m_sendBuffer.ReadData(buf, BUFBLOCK_SIZE, false);
+            pConnect->GetSendBuffer().ReadData(buf, BUFBLOCK_SIZE, false);
             iocpData.bufSize = BUFBLOCK_SIZE;
             m_pNetMonitor->AddSend(pConnect->GetSocket()->GetSocket(), (char*) &iocpData, sizeof(IOCP_DATA));
         } else {
-            pConnect->m_sendBuffer.ReadData(buf, nLength, false);
+            pConnect->GetSendBuffer().ReadData(buf, nLength, false);
             iocpData.bufSize = (unsigned short) nLength;
             m_pNetMonitor->AddSend(pConnect->GetSocket()->GetSocket(), (char*) &iocpData, sizeof(IOCP_DATA));
         }

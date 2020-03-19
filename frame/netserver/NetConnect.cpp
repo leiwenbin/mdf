@@ -324,5 +324,13 @@ namespace mdf {
         return m_bNormalDisconnect;
     }
 
+    IOBuffer NetConnect::GetRecvBuffer() {
+        return m_recvBuffer;
+    }
+
+    IOBuffer NetConnect::GetSendBuffer() {
+        return m_sendBuffer;
+    }
+
 } //namespace mdf
 
