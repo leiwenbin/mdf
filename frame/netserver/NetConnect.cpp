@@ -117,11 +117,11 @@ namespace mdf {
         return m_bReadAble && (0 < m_recvBuffer.GetLength());
     }
 
-    uint32 NetConnect::GetLength() {
+    unsigned int NetConnect::GetLength() {
         return m_recvBuffer.GetLength();
     }
 
-    uint32 NetConnect::GetSendBuffUsedLength() {
+    unsigned int NetConnect::GetSendBuffUsedLength() {
         return m_sendBuffer.GetLength();
     }
 
@@ -206,7 +206,7 @@ namespace mdf {
 
     bool NetConnect::IsInGroups(std::vector<std::string>* groups) {
         if (NULL == groups) return false;
-        for (uint32 i = 0; i < groups->size(); i++) {
+        for (unsigned int i = 0; i < groups->size(); i++) {
             if (m_groups.end() != m_groups.find(groups->at(i))) return true;
         }
         return false;

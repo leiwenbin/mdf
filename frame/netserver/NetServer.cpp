@@ -4,7 +4,7 @@
 #include "../../../include/frame/netserver/IOCPFrame.h"
 #include "../../../include/frame/netserver/EpollFrame.h"
 
-namespace mdf {
+namespace mdf   {
 
     NetServer::NetServer() {
 #ifdef WIN32
@@ -142,17 +142,17 @@ namespace mdf {
     }
 
     //获取当前连接数
-    uint32 NetServer::GetConnectionCount() {
+    unsigned int NetServer::GetConnectionCount() {
         return m_pNetCard->GetConnectionCount();
     }
 
     //获取网络IO线程池任务数
-    uint32 NetServer::GetNetIOTaskCount() {
+    unsigned int NetServer::GetNetIOTaskCount() {
         return m_pNetCard->GetNetIOTaskCount();
     }
 
     //获取工作线程池任务数
-    uint32 NetServer::GetWorkTaskCount() {
+    unsigned int NetServer::GetWorkTaskCount() {
         return m_pNetCard->GetWorkTaskCount();
     }
 

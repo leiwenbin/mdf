@@ -587,8 +587,7 @@ namespace mdf {
 
         AutoLock lock(&m_serListMutex);
         vector<SVR_CONNECT*> sockArray;
-        map<uint64, vector<SVR_CONNECT*> >::iterator
-                it = m_keepIPList.find(addr64);
+        map<uint64, vector<SVR_CONNECT*> >::iterator it = m_keepIPList.find(addr64);
         if (it == m_keepIPList.end()) m_keepIPList.insert(map<uint64, vector<SVR_CONNECT*> >::value_type(addr64, sockArray));
         SVR_CONNECT* pSvr = new SVR_CONNECT;
         pSvr->reConnectSecond = reConnectTime;
@@ -622,7 +621,7 @@ namespace mdf {
         Socket sock; //监听socket
         if (!sock.Init(Socket::tcp)) return NetEngine::cannotCreateSocket;
         sock.SetSockMode();
-// 	bool successed = sock.Connect(ip, port);
+// 	bool success = sock.Connect(ip, port);
         svrSock = sock.Detach();
         return AsyncConnect(svrSock, ip, port);
     }
@@ -787,7 +786,7 @@ namespace mdf {
 
         bool isEnd = true; //已经到达m_keepIPList末尾
         while (!m_stop) {
-            //复制所有connectting状态的sock到监听列表
+            //复制所有connect状态的sock到监听列表
             clientCount = 0;
             isEnd = true;
             {
@@ -1110,7 +1109,7 @@ namespace mdf {
         m_noDelay = true;
     }
 
-    uint32 NetEngine::GetConnectionCount() {
+    unsigned int NetEngine::GetConnectionCount() {
         return m_connectList.size();
     }
 
@@ -1118,11 +1117,11 @@ namespace mdf {
         return m_connectList.size() < (uint32) m_maxConnectCount;
     }
 
-    uint32 NetEngine::GetNetIOTaskCount() {
+    unsigned int NetEngine::GetNetIOTaskCount() {
         return m_ioThreads.GetTaskCount();
     }
 
-    uint32 NetEngine::GetWorkTaskCount() {
+    unsigned int NetEngine::GetWorkTaskCount() {
         return m_workThreads.GetTaskCount();
     }
 

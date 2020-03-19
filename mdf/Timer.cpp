@@ -177,7 +177,7 @@ namespace mdf {
                 }
             }
             { //逐个任务执行
-                for (uint32 i = 0; i < waitTasks.size(); i++) {
+                for (unsigned int i = 0; i < waitTasks.size(); i++) {
                     {
                         AutoLock lock(&waitTasks[i]->lock); //不阻塞SetTimer线程，只阻塞部分KillTimer线程
                         if (2 != waitTasks[i]->state) {

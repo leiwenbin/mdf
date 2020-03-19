@@ -23,7 +23,7 @@ namespace mdf {
         Finished();
     }
 
-    mdf::uint32 FinishedTime::UseTime() {
+    unsigned int FinishedTime::UseTime() {
         return m_useTime;
     }
 

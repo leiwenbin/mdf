@@ -60,7 +60,7 @@ namespace mdf {
 //数据写入缓冲
     bool IOBuffer::WriteData(char* data, unsigned short nSize) {
         unsigned char* ioBuf;
-        uint32 nSendSize = 0;
+        unsigned int nSendSize = 0;
         //数据加入发送缓冲，交给底层去发送
         while (true) {
             if (nSize > BUFBLOCK_SIZE) {
@@ -95,8 +95,8 @@ namespace mdf {
         IOBufferBlock* pRecvBlock = NULL;
         AutoLock lock(&m_mutex);
         vector<IOBufferBlock*>::iterator it = m_recvBufferList.begin();
-        uint32 uRecvSize = 0;
-        uint32 uStartPos = 0;
+        unsigned int uRecvSize = 0;
+        unsigned int uStartPos = 0;
 
         for (; it != m_recvBufferList.end();) {
             pRecvBlock = *it;
@@ -141,7 +141,7 @@ namespace mdf {
         m_uDataSize = 0;
     }
 
-    uint32 IOBuffer::GetLength() {
+    unsigned int IOBuffer::GetLength() {
         return m_uDataSize;
     }
 

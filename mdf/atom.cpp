@@ -7,7 +7,7 @@
 namespace mdf {
 
 //自增,返回新值
-    uint32 AtomSelfAdd(void* var) {
+    unsigned int AtomSelfAdd(void* var) {
 #ifdef WIN32
         return InterlockedIncrement((long *)(var)); // NOLINT
 #else
@@ -16,7 +16,7 @@ namespace mdf {
     }
 
 //自减,返回新值
-    uint32 AtomSelfDec(void* var) {
+    unsigned int AtomSelfDec(void* var) {
 #ifdef WIN32
         return InterlockedDecrement((long *)(var)); // NOLINT
 #else
@@ -25,7 +25,7 @@ namespace mdf {
     }
 
 //加一个值,返回旧值
-    uint32 AtomAdd(void* var, const uint32 value) {
+    unsigned int AtomAdd(void* var, const unsigned int value) {
 #ifdef WIN32
         return InterlockedExchangeAdd((long *)(var), value); // NOLINT
 #else
@@ -34,7 +34,7 @@ namespace mdf {
     }
 
 //减一个值,返回旧值
-    uint32 AtomDec(void* var, int32 value) {
+    unsigned int AtomDec(void* var, int value) {
         value = value * -1;
 #ifdef WIN32
         return InterlockedExchangeAdd((long *)(var), value); // NOLINT
@@ -44,7 +44,7 @@ namespace mdf {
     }
 
 //赋值,windows下返回新值，linux下返回旧值
-    uint32 AtomSet(void* var, const uint32 value) {
+    unsigned int AtomSet(void* var, const unsigned int value) {
 #ifdef WIN32
         ::InterlockedExchange((long *)(var), (long)(value)); // NOLINT
 #else
@@ -54,7 +54,7 @@ namespace mdf {
     }
 
 //取值
-    uint32 AtomGet(void* var) {
+    unsigned int AtomGet(void* var) {
 #ifdef WIN32
         return InterlockedExchangeAdd((long *)(var), 0); // NOLINT
 #else

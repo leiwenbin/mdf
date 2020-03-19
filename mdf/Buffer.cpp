@@ -32,11 +32,11 @@ namespace mdf {
         }
     }
 
-    int32 Buffer::Size() {
+    int Buffer::Size() {
         return m_sumSize;
     }
 
-    void Buffer::AddData(unsigned char* pData, int32 size) {
+    void Buffer::AddData(unsigned char* pData, int size) {
         mdf::AutoLock lock(&m_lock);
         if (NULL == m_pHeader) {
             //增加结点
@@ -53,8 +53,8 @@ namespace mdf {
             m_pHeader->size = 0;
         }
 
-        int32 saveSize = 0;
-        int32 pos = 0;
+        int saveSize = 0;
+        int pos = 0;
         while (size > 0) {
             //将剩余数据存入链表尾
             if (m_pTail->size + size <= EXPAND_SIZE) //不用扩大链表
@@ -88,12 +88,12 @@ namespace mdf {
         }
     }
 
-    bool Buffer::GetData(unsigned char* pData, int32 size, bool checkData) {
+    bool Buffer::GetData(unsigned char* pData, int size, bool checkData) {
         mdf::AutoLock lock(&m_lock);
         if (m_sumSize < size) return false;
         if (!checkData) m_sumSize -= size;
 
-        int32 getSize = 0;
+        int getSize = 0;
         int pos = 0;
         LIST_NODE* pHeader = m_pHeader;
         while (true) {
@@ -124,12 +124,12 @@ namespace mdf {
         return true;
     }
 
-    bool Buffer::Seek(int32 size) {
+    bool Buffer::Seek(int size) {
         mdf::AutoLock lock(&m_lock);
         if (m_sumSize < size) return false;
         m_sumSize -= size; //跳过数据
 
-        int32 seekSize = 0; //跳过长度
+        int seekSize = 0; //跳过长度
         LIST_NODE* pHeader = m_pHeader;
         while (true) {
             if (pHeader->size - pHeader->pos >= size) //跳过长度<当前节点剩余数据，在节点内跳过

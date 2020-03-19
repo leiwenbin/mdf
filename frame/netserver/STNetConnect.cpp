@@ -77,7 +77,7 @@ namespace mdf {
         return m_bReadAble && 0 < m_recvBuffer.GetLength();
     }
 
-    uint32 STNetConnect::GetLength() {
+    unsigned int STNetConnect::GetLength() {
         return m_recvBuffer.GetLength();
     }
 

@@ -41,7 +41,7 @@ namespace mdf {
             AtomAdd(&m_nWriteAbleCount, 1);
             return false;
         }
-        uint32 pushPos = AtomAdd(&m_push, 1);
+        unsigned int pushPos = AtomAdd(&m_push, 1);
         pushPos = pushPos % m_nSize;
         /*
          只有在NPop并发情况下，因Pop无序完成，第一个位置的Pop未完成，
@@ -68,7 +68,7 @@ namespace mdf {
             AtomAdd(&m_nReadAbleCount, 1);
             return NULL;
         }
-        uint32 popPos = AtomAdd(&m_pop, 1);
+        unsigned int popPos = AtomAdd(&m_pop, 1);
         popPos = popPos % m_nSize;
         /*
          只有在NPush并发情况下，因Push无序完成，第一个位置的Push未完成，
@@ -91,7 +91,7 @@ namespace mdf {
     void Queue::Clear() {
         if (NULL == m_queue)
             return;
-        uint32 i = 0;
+        unsigned int i = 0;
         m_nWriteAbleCount = m_nSize;
         m_nReadAbleCount = 0;
         for (i = 0; i < m_nSize; i++) {

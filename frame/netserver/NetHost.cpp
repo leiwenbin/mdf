@@ -112,12 +112,12 @@ namespace mdf {
     }
 
     //获取发送缓冲区的数据长度
-    uint32 NetHost::GetSendBufferDataLength() {
+    unsigned int NetHost::GetSendBufferDataLength() {
         return m_pConnect->GetSendBuffUsedLength();
     }
 
     //获取接收缓冲区的数据长度
-    uint32 NetHost::GetRecvBufferDataLength() {
+    unsigned int NetHost::GetRecvBufferDataLength() {
         return m_pConnect->GetLength();
     }
 
